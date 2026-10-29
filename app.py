@@ -1,5 +1,7 @@
 import os
 from datetime import date, timedelta
+from pathlib import Path
+from urllib.parse import quote_plus, urlparse
 
 import pandas as pd
 import plotly.express as px
@@ -10,14 +12,45 @@ from dotenv import load_dotenv
 # ---------------------------------------------------------------
 # Configuração
 # ---------------------------------------------------------------
-load_dotenv()
+# Procura o .env sempre na mesma pasta do app.py (não importa de onde o comando foi rodado)
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+load_dotenv(ENV_PATH)
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Formato alternativo: variáveis separadas (DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT)
+if not DATABASE_URL and os.getenv("DB_HOST"):
+    DATABASE_URL = (
+        f"postgresql://{quote_plus(os.getenv('DB_USER', ''))}:{quote_plus(os.getenv('DB_PASSWORD', ''))}"
+        f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME', 'neondb')}"
+        "?sslmode=require"
+    )
+
+if not DATABASE_URL:  # alternativa: Secrets do Streamlit (.streamlit/secrets.toml)
+    try:
+        DATABASE_URL = st.secrets.get("DATABASE_URL")
+    except Exception:
+        DATABASE_URL = None
 
 st.set_page_config(page_title="Marketplace", page_icon="🔁", layout="wide")
 
 if not DATABASE_URL:
-    st.error("Defina DATABASE_URL no arquivo .env")
+    st.error("Dados de conexão com o banco não encontrados (DATABASE_URL ou DB_HOST/DB_USER/...).")
+    st.markdown(
+        f"""
+**O que verificar:**
+1. Existe um arquivo chamado exatamente `.env` (não `.env.example`, nem `.env.txt`) nesta pasta?
+   `{ENV_PATH.parent}` → arquivo `.env` encontrado: **{"sim" if ENV_PATH.exists() else "NÃO"}**
+2. Dentro dele há `DATABASE_URL=postgresql://usuario:senha@host/banco?sslmode=require`
+   **ou** as variáveis `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` e `DB_PORT`
+   (sem espaços em volta do `=`).
+3. Depois de salvar o arquivo, pare o Streamlit (Ctrl+C) e rode `streamlit run app.py` de novo.
+
+Publicado no Streamlit Cloud? Defina `DATABASE_URL` em *Settings → Secrets*.
+"""
+    )
     st.stop()
+
+DATABASE_URL = DATABASE_URL.strip().strip('"').strip("'")
 
 ESTADOS = ["Novo", "Quase Novo", "Usado", "Razoável", "Com avarias"]
 TIPOS = ["Venda", "Empréstimo"]
@@ -1129,6 +1162,59 @@ def pagina_dashboard():
 
 
 # ---------------------------------------------------------------
+# Diagnóstico: tabelas ausentes
+# ---------------------------------------------------------------
+TABELAS_ESPERADAS = [
+    "usuario", "cartao", "categoria", "item", "tag", "item_tag", "anuncio", "emprestimo",
+    "foto_anuncio", "comentario", "mensagem", "suporte", "avaliacao", "transacao",
+    "pagamento", "entrega",
+]
+
+
+def diagnostico_tabelas():
+    st.error("O app conectou ao banco, mas não encontrou as tabelas do marketplace nele.")
+    try:
+        info = query_df(
+            "SELECT current_database() AS banco, current_user AS usuario, current_schema() AS esquema"
+        ).iloc[0]
+        tabs = query_df(
+            """SELECT table_schema AS esquema, table_name AS tabela
+               FROM information_schema.tables
+               WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+               ORDER BY 1, 2"""
+        )
+    except psycopg2.Error as e:
+        db_error(e)
+        return
+
+    host = urlparse(DATABASE_URL).hostname
+    st.markdown(
+        f"**Onde o app está conectado** (compare com o painel do Neon):\n\n"
+        f"- Host: `{host}`\n- Banco: `{info['banco']}`\n"
+        f"- Usuário: `{info['usuario']}`\n- Esquema padrão: `{info['esquema']}`"
+    )
+    if tabs.empty:
+        st.warning(
+            "Este banco está **vazio**. Rode o `schema.sql` (e depois o `seed.sql`) no SQL Editor "
+            "do Neon, **no mesmo branch e banco** acima."
+        )
+        return
+
+    st.write("Tabelas que o app enxerga neste banco:")
+    st.dataframe(tabs, hide_index=True, width="stretch")
+    no_public = set(tabs.loc[tabs["esquema"] == "public", "tabela"])
+    faltam = [t for t in TABELAS_ESPERADAS if t not in no_public]
+    if faltam:
+        st.warning("Faltam no esquema `public`: " + ", ".join(f"`{t}`" for t in faltam))
+        fora = tabs[(tabs["esquema"] != "public") & (tabs["tabela"].isin(faltam))]
+        if not fora.empty:
+            st.info(
+                "Algumas dessas tabelas existem em OUTRO esquema (veja a lista acima). "
+                "Recrie-as no esquema `public` com o `schema.sql`."
+            )
+
+
+# ---------------------------------------------------------------
 # Navegação
 # ---------------------------------------------------------------
 sidebar_conta()
@@ -1149,6 +1235,8 @@ with st.sidebar:
 
 try:
     PAGINAS[escolha]()
+except psycopg2.errors.UndefinedTable:
+    diagnostico_tabelas()
 except psycopg2.OperationalError as e:
     st.error("Não foi possível conectar ao banco. Verifique a DATABASE_URL.")
     st.caption(str(e))
