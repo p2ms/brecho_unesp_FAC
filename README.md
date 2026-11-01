@@ -27,6 +27,27 @@ entrega e avaliam o vendedor. Um **dashboard analítico** mostra como o mercado 
 | Perfil | Dados, nota média e cartões | usuario, avaliacao, cartao |
 | Dashboard | Análises (ver abaixo) | todas |
 
+## Estrutura do código
+
+```
+app.py                     # ponto de entrada: configuração da página, menu lateral e navegação
+marketplace/
+├── config.py              # DATABASE_URL (.env / Secrets) e constantes do domínio
+├── db.py                  # conexão, query_df, execute e run_tx (transações)
+├── auth.py                # usuário logado, require_login e menu de login/cadastro
+├── services.py            # regras de negócio: anúncios e ciclo da transação
+├── components.py          # chat, comentários e card de preço
+└── paginas/               # uma função pagina_* por página
+    ├── loja.py            # vitrine + detalhe do anúncio
+    ├── busca.py           # busca avançada
+    ├── anunciar.py
+    ├── mensagens.py
+    ├── transacoes.py      # minhas compras / minhas vendas
+    ├── perfil.py
+    ├── dashboard.py
+    └── diagnostico.py     # ajuda quando o banco não tem as tabelas
+```
+
 ### Técnicas de SQL usadas
 
 `JOIN` de até 4 tabelas, `LEFT JOIN`, subconsultas correlacionadas, `WITH RECURSIVE` (hierarquia de categorias),
