@@ -1,33 +1,23 @@
 """Diagnóstico exibido quando o banco não tem as tabelas do marketplace."""
-from urllib.parse import urlparse
-
-import psycopg2
 import streamlit as st
 
-from ..config import DATABASE_URL, TABELAS_ESPERADAS
-from ..db import db_error, query_df
+from ..config import TABELAS_ESPERADAS
+from ..erros import ErroAplicacao
+from ..services import diagnostico
 
 
 def diagnostico_tabelas():
     st.error("O app conectou ao banco, mas não encontrou as tabelas do marketplace nele.")
     try:
-        info = query_df(
-            "SELECT current_database() AS banco, current_user AS usuario, current_schema() AS esquema"
-        ).iloc[0]
-        tabs = query_df(
-            """SELECT table_schema AS esquema, table_name AS tabela
-               FROM information_schema.tables
-               WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
-               ORDER BY 1, 2"""
-        )
-    except psycopg2.Error as e:
-        db_error(e)
+        info = diagnostico.info_conexao()
+        tabs = diagnostico.listar_tabelas()
+    except ErroAplicacao as e:
+        st.error(str(e))
         return
 
-    host = urlparse(DATABASE_URL).hostname
     st.markdown(
         f"**Onde o app está conectado** (compare com o painel do Neon):\n\n"
-        f"- Host: `{host}`\n- Banco: `{info['banco']}`\n"
+        f"- Host: `{info['host']}`\n- Banco: `{info['banco']}`\n"
         f"- Usuário: `{info['usuario']}`\n- Esquema padrão: `{info['esquema']}`"
     )
     if tabs.empty:

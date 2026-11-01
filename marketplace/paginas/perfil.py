@@ -1,22 +1,17 @@
 """Página Perfil: dados do usuário, nota média e cartões."""
-import pandas as pd
-import psycopg2
 import streamlit as st
 
 from ..auth import require_login
-from ..db import db_error, execute, query_df
+from ..erros import ErroAplicacao
+from ..services import usuarios
 
 
 def pagina_perfil():
     user = require_login()
     st.header("👤 Meu perfil")
 
-    atual = query_df("SELECT * FROM usuario WHERE cpf = %s", (user["cpf"],)).iloc[0].to_dict()
-    atual = {k: (None if pd.isna(v) else v) for k, v in atual.items()}
-    media = query_df(
-        "SELECT AVG(nota)::float AS media, COUNT(*) AS qtd FROM avaliacao WHERE cpf_avaliado = %s",
-        (user["cpf"],),
-    ).iloc[0]
+    atual = usuarios.obter_perfil(user["cpf"])
+    media = usuarios.nota_media(user["cpf"])
 
     c1, c2 = st.columns([1, 3])
     with c1:
@@ -38,22 +33,18 @@ def pagina_perfil():
         bio = st.text_area("Bio", value=atual["bio"] or "")
         if st.form_submit_button("Salvar"):
             try:
-                execute(
-                    "UPDATE usuario SET nome = %s, foto = %s, bio = %s WHERE cpf = %s",
-                    (nome.strip(), foto.strip() or None, bio.strip() or None, user["cpf"]),
-                )
+                usuarios.atualizar_perfil(user["cpf"], nome, foto, bio)
                 st.session_state["user"]["nome"] = nome.strip()
                 st.success("Perfil atualizado!")
                 st.rerun()
-            except psycopg2.Error as e:
-                db_error(e)
+            except ErroAplicacao as e:
+                st.error(str(e))
 
     st.subheader("💳 Meus cartões")
-    cartoes = query_df("SELECT numero, metodo FROM cartao WHERE cpf = %s", (user["cpf"],))
+    cartoes = usuarios.listar_cartoes(user["cpf"])
     if cartoes.empty:
         st.caption("Nenhum cartão cadastrado.")
     else:
-        cartoes["numero"] = "•••• " + cartoes["numero"].str[-4:]
         st.dataframe(cartoes, width="stretch", hide_index=True)
 
     with st.form("novo_cartao", clear_on_submit=True):
@@ -61,10 +52,7 @@ def pagina_perfil():
         metodo = st.selectbox("Tipo", ["Crédito", "Débito"])
         if st.form_submit_button("Adicionar cartão"):
             try:
-                execute(
-                    "INSERT INTO cartao (cpf, numero, metodo) VALUES (%s, %s, %s)",
-                    (user["cpf"], numero.strip(), metodo),
-                )
+                usuarios.adicionar_cartao(user["cpf"], numero, metodo)
                 st.rerun()
-            except psycopg2.Error as e:
-                db_error(e)
+            except ErroAplicacao as e:
+                st.error(str(e))

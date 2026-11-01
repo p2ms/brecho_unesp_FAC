@@ -3,21 +3,13 @@ import streamlit as st
 
 from ..auth import require_login
 from ..components import chat
-from ..db import query_df
+from ..services import interacoes
 
 
 def pagina_mensagens():
     user = require_login()
     st.header("✉️ Mensagens")
-    convs = query_df(
-        """SELECT DISTINCT a.id_anuncio, a.titulo, u.cpf AS outro_cpf, u.nome AS outro_nome
-           FROM mensagem m
-           JOIN anuncio a ON a.id_anuncio = m.id_anuncio
-           JOIN usuario u ON u.cpf = CASE WHEN m.cpf_remetente = %s
-                                          THEN m.cpf_destinatario ELSE m.cpf_remetente END
-           WHERE m.cpf_remetente = %s OR m.cpf_destinatario = %s""",
-        (user["cpf"],) * 3,
-    )
+    convs = interacoes.listar_conversas(user["cpf"])
     if convs.empty:
         st.info("Você ainda não tem conversas.")
         return
