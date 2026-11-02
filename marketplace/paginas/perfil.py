@@ -4,12 +4,12 @@ import streamlit as st
 from ..auth import require_login
 from ..components import eh_link
 from ..erros import ErroAplicacao
+from ..estilo import sol_html
 from ..services import usuarios
 
 
 def pagina_perfil():
     user = require_login()
-    st.header(":material/person: Meu perfil")
 
     atual = usuarios.obter_perfil(user["cpf"])
     media = usuarios.nota_media(user["cpf"])
@@ -19,12 +19,10 @@ def pagina_perfil():
         if eh_link(atual["foto"]):
             st.image(atual["foto"], width="stretch")
         else:
-            st.markdown("# :material/account_circle:")
+            st.html(sol_html(96))
     with c2:
-        st.subheader(atual["nome"])
-        st.caption(atual["email"])
         if media["qtd"]:
-            st.write(f":material/star: **{media['media']:.1f}** ({int(media['qtd'])} avaliações)")
+            st.write(f"**Nota média:** {media['media']:.1f} ({int(media['qtd'])} avaliações)")
         else:
             st.write("Sem avaliações ainda.")
 
@@ -32,7 +30,7 @@ def pagina_perfil():
         nome = st.text_input("Nome", value=atual["nome"])
         foto = st.text_input("URL da foto", value=atual["foto"] or "")
         bio = st.text_area("Bio", value=atual["bio"] or "")
-        if st.form_submit_button("Salvar"):
+        if st.form_submit_button("Salvar", type="primary"):
             try:
                 usuarios.atualizar_perfil(user["cpf"], nome, foto, bio)
                 st.session_state["user"]["nome"] = nome.strip()
@@ -41,7 +39,7 @@ def pagina_perfil():
             except ErroAplicacao as e:
                 st.error(str(e))
 
-    st.subheader(":material/credit_card: Meus cartões")
+    st.subheader("Meus cartões")
     cartoes = usuarios.listar_cartoes(user["cpf"])
     if cartoes.empty:
         st.caption("Nenhum cartão cadastrado.")

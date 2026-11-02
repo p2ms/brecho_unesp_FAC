@@ -10,7 +10,7 @@ from ..services import interacoes
 def pagina_mensagens():
     trilha("MENSAGENS")
     user = require_login()
-    st.header(":material/mail: Mensagens")
+    st.header("Mensagens")
     convs = interacoes.listar_conversas(user["cpf"])
     if convs.empty:
         st.info("Você ainda não tem conversas.")

@@ -27,7 +27,8 @@ def pagina_conta():
     trilha(("MINHA CONTA", "conta"), ABAS[aba][0].upper())
 
     c1, c2 = st.columns([6, 1], vertical_alignment="center")
-    c1.write(f"Olá, **{user['nome']}**")
+    c1.header(user["nome"])
+    c1.caption(user["email"])
     if c2.button("Sair", width="stretch"):
         del st.session_state["user"]
         st.rerun()

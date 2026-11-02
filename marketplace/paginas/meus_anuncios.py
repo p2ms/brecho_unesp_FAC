@@ -87,7 +87,7 @@ def _apagar(cpf, id_anuncio, titulo):
 def pagina_minha_loja():
     trilha("MINHA LOJA")
     user = require_login()
-    st.header(":material/store: Minha loja")
+    st.header("Minha loja")
     aviso = st.session_state.pop("aviso_anuncios", None)
     if aviso:
         st.success(aviso)

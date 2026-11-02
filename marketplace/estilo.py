@@ -19,6 +19,7 @@ _CSS = """
 <style>
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -101,7 +102,9 @@ _CSS = """
         --margem: 1rem;
     }
 }
+[data-testid="stMain"] h1,
 [data-testid="stMain"] h2 {
+    font-family: "Spectral", serif;
     font-weight: 300;
 }
 .capa {
@@ -193,6 +196,26 @@ _CSS = """
 """
 
 
+# No celular, o Streamlit deixa o menu aberto ao carregar e ao usar st.page_link, cobrindo a página
+_FECHAR_MENU_NO_CELULAR = """
+<script>
+if (!window.brechoFecharMenu) {
+    window.brechoFecharMenu = () => {
+        if (window.innerWidth < 768) {
+            document.querySelector('[data-testid="stSidebarCollapseButton"] button')?.click();
+        }
+    };
+    setTimeout(window.brechoFecharMenu, 800);
+    document.addEventListener("click", (e) => {
+        if (e.target.closest('[data-testid="stSidebar"] a')) {
+            window.brechoFecharMenu();
+        }
+    });
+}
+</script>
+"""
+
+
 def sol_svg(tamanho=144, cor=ROSA):
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="{tamanho}" height="{tamanho}" viewBox="0 0 100 100" '
@@ -210,3 +233,4 @@ def sol_html(tamanho=144, cor=ROSA):
 def aplicar_estilo():
     px.defaults.color_discrete_sequence = CORES_GRAFICOS  # o tema não alcança as pizzas
     st.html(_CSS)
+    st.html(_FECHAR_MENU_NO_CELULAR, unsafe_allow_javascript=True)

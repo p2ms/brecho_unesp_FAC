@@ -16,14 +16,14 @@ def diagnostico_tabelas():
         return
 
     st.markdown(
-        f"**Onde o app está conectado** (compare com o painel do Neon):\n\n"
+        f"**Onde o app está conectado** (compare com o painel do Supabase):\n\n"
         f"- Host: `{info['host']}`\n- Banco: `{info['banco']}`\n"
         f"- Usuário: `{info['usuario']}`\n- Esquema padrão: `{info['esquema']}`"
     )
     if tabs.empty:
         st.warning(
             "Este banco está **vazio**. Rode o `schema.sql` (e depois o `seed.sql`) no SQL Editor "
-            "do Neon, **no mesmo branch e banco** acima."
+            "do Supabase, **no mesmo projeto e banco** acima."
         )
         return
 

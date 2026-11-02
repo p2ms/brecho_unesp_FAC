@@ -11,10 +11,10 @@ from ..services import anuncios
 def pagina_anunciar():
     trilha("ANUNCIAR")
     user = require_login()
-    st.header(":material/sell: Criar anúncio")
+    st.header("Criar anúncio")
 
     cats = anuncios.listar_categorias()
-    with st.expander(":material/add: Nova categoria"):
+    with st.expander("Nova categoria"):
         with st.form("nova_categoria", clear_on_submit=True):
             nome_cat = st.text_input("Nome da categoria")
             pai = st.selectbox("Categoria pai (opcional)", [""] + list(cats["nome_categoria"]))
@@ -56,7 +56,7 @@ def pagina_anunciar():
         tags = st.text_input("Tags (separadas por vírgula)")
         reestocavel = st.checkbox("Item reestocável")
 
-        if st.form_submit_button("Publicar", width="stretch"):
+        if st.form_submit_button("Publicar", type="primary", width="stretch"):
             dados = {
                 "titulo": titulo.strip(), "descricao": descricao.strip(),
                 "preco": preco, "tipo": tipo, "prazo": int(prazo),

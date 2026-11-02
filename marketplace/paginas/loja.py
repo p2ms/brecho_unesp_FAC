@@ -100,8 +100,8 @@ def pagina_loja():
         st.info("Nenhum anúncio encontrado.")
     else:
         st.caption(
-            f"{len(df)} anúncio(s) · preço médio R$ {df['preco'].mean():.2f} · "
-            f"mediana R$ {df['preco'].median():.2f}"
+            f"{len(df)} anúncio(s) · preço médio R\\$ {df['preco'].mean():.2f} · "
+            f"mediana R\\$ {df['preco'].median():.2f}"
         )
         cols = st.columns(3)
         for i, (_, a) in enumerate(df.head(limite).iterrows()):
