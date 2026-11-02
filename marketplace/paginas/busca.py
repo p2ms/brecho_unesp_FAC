@@ -3,10 +3,12 @@ import streamlit as st
 
 from ..config import ESTADOS, TIPOS
 from ..erros import ErroAplicacao
+from ..navegacao import trilha
 from ..services import anuncios
 
 
 def pagina_busca():
+    trilha(("LOJA", "loja"), "BUSCA AVANÇADA")
     st.header(":material/search: Busca avançada")
     st.caption(
         "Combine filtros de várias tabelas: a busca junta anúncio, item, categoria "

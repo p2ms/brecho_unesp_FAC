@@ -4,10 +4,12 @@ import streamlit as st
 from ..auth import require_login
 from ..config import ESTADOS, TIPOS
 from ..erros import ErroAplicacao
+from ..navegacao import trilha
 from ..services import anuncios
 
 
 def pagina_anunciar():
+    trilha("ANUNCIAR")
     user = require_login()
     st.header(":material/sell: Criar anúncio")
 

@@ -6,6 +6,7 @@ from ..auth import require_login
 from ..components import eh_link
 from ..config import ESTADOS
 from ..erros import ErroAplicacao
+from ..navegacao import trilha
 from ..services import anuncios
 
 
@@ -84,6 +85,7 @@ def _apagar(cpf, id_anuncio, titulo):
 
 
 def pagina_minha_loja():
+    trilha("MINHA LOJA")
     user = require_login()
     st.header(":material/store: Minha loja")
     aviso = st.session_state.pop("aviso_anuncios", None)
@@ -94,7 +96,7 @@ def pagina_minha_loja():
     if not meus.empty:
         meus = meus[~meus["bloqueado"]]
     if meus.empty:
-        st.info("Nenhum anúncio para editar. Os que já têm transação ficam em 'Minhas vendas'.")
+        st.info("Nenhum anúncio para editar. Os que já têm transação ficam em 'Minha conta', na seção Vendas.")
         return
 
     for _, a in meus.iterrows():

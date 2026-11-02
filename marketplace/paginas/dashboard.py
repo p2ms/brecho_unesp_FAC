@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from ..navegacao import trilha
 from ..services import analises
 
 
@@ -14,6 +15,7 @@ def _mostrar(col, df, fig_fn):
 
 
 def pagina_dashboard():
+    trilha("PAINEL")
     st.header(":material/bar_chart: Dashboard analítico")
     tab_geral, tab_mercado, tab_usuarios, tab_op = st.tabs(
         ["Visão geral", "Mercado", "Usuários", "Operação"]

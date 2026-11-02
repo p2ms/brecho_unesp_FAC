@@ -16,12 +16,66 @@ _SOL = (
 
 _CSS = """
 <style>
-[data-testid="stSidebar"] h1 {
-    font-family: "Jost", sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarUserContent"] {
+    margin: 0;
+    padding: 0;
+}
+[class*="st-key-menu_"] [data-testid="stElementContainer"] {
+    margin: 0;
+}
+[data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] {
+    gap: 0;
+}
+[class*="st-key-menu_"] a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px 32px;
+    border-radius: 0;
+    border-bottom: 1px solid #FE0B5D;
+}
+[class*="st-key-menu_"] a p {
+    color: #000000;
+    font-size: 15px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
+}
+.st-key-menu_marca a,
+.st-key-menu_ativo a,
+[class*="st-key-menu_"] a:hover {
+    background: #FE0B5D;
+}
+.st-key-menu_marca a {
+    border-bottom-color: #000000;
+}
+.st-key-menu_busca {
+    padding: 10px 32px;
+    border-bottom: 1px solid #FE0B5D;
+}
+.st-key-menu_busca label p {
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+.st-key-menu_sol {
+    padding: 32px;
+}
+.st-key-trilha {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #FE0B5D;
+}
+.st-key-trilha a {
+    padding: 0;
+}
+.st-key-trilha a p,
+.st-key-trilha [data-testid="stText"] {
+    color: #000000;
+    font-family: "Jost", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.24em;
 }
 /* O rosa não dá contraste com texto branco: botões principais usam texto preto */
 [data-testid="stBaseButton-primary"],

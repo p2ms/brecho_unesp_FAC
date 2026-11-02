@@ -5,25 +5,28 @@ from ..auth import current_user
 from ..components import card_preco, chat, comentarios, eh_link
 from ..config import ESTADOS, METODOS_ENTREGA, METODOS_PAGAMENTO, TIPOS
 from ..erros import ErroAplicacao
+from ..navegacao import pagina, trilha
 from ..services import anuncios, transacoes
 
 
 def pagina_loja():
-    sel = st.session_state.get("anuncio_sel")
-    if sel:
-        return detalhe_anuncio(sel)
-
+    busca =st.query_params.get("q", "").strip()
+    trilha(("LOJA", "loja"), f"BUSCA: {busca}" if busca else "TODOS OS ANÚNCIOS")
     st.header(":material/storefront: Anúncios disponíveis")
     df = anuncios.buscar_anuncios()
     if df.empty:
         st.info("Nenhum anúncio disponível ainda.")
         return
 
-    c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
-    busca = c1.text_input(":material/search: Buscar", placeholder="título, item, marca ou tag...")
-    categoria = c2.selectbox("Categoria", ["Todas"] + sorted(df["nome_categoria"].unique()))
-    tipo = c3.selectbox("Tipo", ["Todos"] + TIPOS)
-    estado = c4.selectbox("Estado", ["Todos"] + ESTADOS)
+    categorias = ["Todas"] + sorted(df["nome_categoria"].unique())
+    pedida = st.query_params.get("categoria")
+    c1, c2, c3 = st.columns(3)
+    categoria = c1.selectbox(
+        "Categoria", categorias, index=categorias.index(pedida) if pedida in categorias else 0
+    )
+    tipo = c2.selectbox("Tipo", ["Todos"] + TIPOS)
+    estado = c3.selectbox("Estado", ["Todos"] + ESTADOS)
+    st.page_link(pagina("busca"), label="Busca avançada")
 
     pmax = float(df["preco"].max())
     if pmax > 0:
@@ -52,21 +55,26 @@ def pagina_loja():
             st.caption(f"Vendedor: {a['vendedor']}")
             if a["tags"]:
                 st.caption(":material/label: " + a["tags"])
-            if st.button("Ver detalhes", key=f"ver_{a['id_anuncio']}", width="stretch"):
-                st.session_state["anuncio_sel"] = int(a["id_anuncio"])
-                st.rerun()
+            st.page_link(
+                pagina("anuncio"), label="Ver detalhes", width="stretch",
+                query_params={"id": int(a["id_anuncio"])},
+            )
 
 
-def detalhe_anuncio(id_anuncio):
-    if st.button(":material/arrow_back: Voltar"):
-        st.session_state["anuncio_sel"] = None
-        st.rerun()
-
-    df = anuncios.buscar_anuncios(apenas_disponiveis=False, id_anuncio=id_anuncio)
-    if df.empty:
+def pagina_anuncio():
+    id_url = st.query_params.get("id", "")
+    id_anuncio = int(id_url) if id_url.isdigit() else None
+    df = anuncios.buscar_anuncios(apenas_disponiveis=False, id_anuncio=id_anuncio) if id_anuncio else None
+    if df is None or df.empty:
+        trilha(("LOJA", "loja"), "ANÚNCIO NÃO ENCONTRADO")
         st.error("Anúncio não encontrado.")
         return
     a = df.iloc[0]
+    trilha(
+        ("LOJA", "loja"),
+        (a["nome_categoria"].upper(), "loja", {"categoria": a["nome_categoria"]}),
+        a["titulo"].upper(),
+    )
     user = current_user()
 
     col_fotos, col_info = st.columns([1, 1])
@@ -109,7 +117,7 @@ def detalhe_anuncio(id_anuncio):
                             user["cpf"], id_anuncio, metodo_pag, metodo_ent
                         )
                         if id_t:
-                            st.success(f"Transação #{id_t} criada! Acompanhe em 'Minhas compras'.")
+                            st.success(f"Transação #{id_t} criada! Acompanhe em 'Minha conta'.")
                         else:
                             st.error("Este anúncio acabou de ser reservado por outra pessoa.")
                     except ErroAplicacao as e:

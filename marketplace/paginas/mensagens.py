@@ -3,10 +3,12 @@ import streamlit as st
 
 from ..auth import require_login
 from ..components import chat
+from ..navegacao import trilha
 from ..services import interacoes
 
 
 def pagina_mensagens():
+    trilha("MENSAGENS")
     user = require_login()
     st.header(":material/mail: Mensagens")
     convs = interacoes.listar_conversas(user["cpf"])

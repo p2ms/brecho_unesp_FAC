@@ -172,6 +172,20 @@ def listar_transacoes(cpf, papel):
     )
 
 
+def contar_pendentes(cpf):
+    """Compras em aberto: usa os mesmos JOINs de listar_transacoes para bater com a lista."""
+    return int(
+        query_df(
+            """SELECT COUNT(*) AS n
+               FROM transacao t
+               JOIN pagamento p ON p.id_transacao = t.id_transacao
+               JOIN entrega e ON e.id_transacao = t.id_transacao
+               WHERE t.cpf_comprador = %s AND t.status = 'Pendente'""",
+            (cpf,),
+        ).iloc[0]["n"]
+    )
+
+
 def listar_chamados(cpf):
     return query_df(
         """SELECT s.id_suporte AS id, a.titulo AS anuncio, s.descricao, s.status, s.data_hora

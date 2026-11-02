@@ -38,6 +38,9 @@ app.py                     # ponto de entrada: configuração da página, menu l
 marketplace/
 ├── config.py              # DATABASE_URL (.env / Secrets) e constantes do domínio
 ├── estilo.py              # CSS que o tema não cobre e desenho do sol
+├── rotas.py               # páginas do app e seus endereços
+├── menu.py                # menu lateral: páginas, sacola, conta e busca
+├── navegacao.py           # acesso às páginas registradas e breadcrumb
 ├── erros.py               # erros da aplicação, com mensagem pronta para a tela
 ├── db.py                  # conexão, query_df, execute e run_tx (transações)
 ├── services/              # "backend": regras de negócio, permissões e todo o SQL
