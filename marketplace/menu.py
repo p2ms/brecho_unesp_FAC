@@ -48,7 +48,7 @@ def menu(atual):
     _sincronizar_endereco(atual)
     user = current_user()
     with st.sidebar:
-        with st.container(key="menu_marca"):
+        with st.container(key="menu_ativo" if atual in ("loja", "anuncio") else "menu_marca"):
             st.page_link(pagina("loja"), label="Brechó da Unesp", width="stretch")
         _linha("Anunciar", "sell", "anunciar", atual)
         _linha("Minha loja", "store", "minha_loja", atual)
