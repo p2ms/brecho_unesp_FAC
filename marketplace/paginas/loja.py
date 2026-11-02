@@ -97,7 +97,7 @@ def detalhe_anuncio(id_anuncio):
         elif user is None:
             st.info("Entre na sua conta para comprar.")
         elif user["cpf"] == a["cpf_vendedor"]:
-            st.info("Este é o seu anúncio.")
+            st.info("Este é o seu anúncio. Para editar ou apagar, vá em 'Minha loja'.")
         else:
             rotulo = "Solicitar empréstimo" if a["tipo"] == "Empréstimo" else "Comprar"
             with st.form(f"form_compra_{id_anuncio}"):

@@ -70,10 +70,11 @@ def enviar_fotos(arquivos):
 
 
 def remover_fotos(urls):
-    """Apaga fotos enviadas para um anúncio que não foi criado; falhar aqui só deixa um arquivo sem uso."""
-    if not urls:
-        return
+    """Apaga do bucket as fotos que não são mais usadas; falhar aqui só deixa um arquivo sem uso."""
     prefixo = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/"
+    urls = [u for u in urls if u.startswith(prefixo)]  # fotos antigas não estão no bucket
+    if not urls or not SUPABASE_SERVICE_KEY:
+        return
     try:
         requests.delete(
             f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}",
