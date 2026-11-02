@@ -17,6 +17,10 @@ _SOL = (
 
 _CSS = """
 <style>
+[data-testid="stSidebar"] {
+    box-sizing: border-box;
+    border-right: 1px solid #FE0B5D !important;
+}
 [data-testid="stSidebarContent"] {
     scrollbar-gutter: auto !important;
 }
