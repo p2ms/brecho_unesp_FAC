@@ -1,9 +1,9 @@
 """Ponto de entrada do Streamlit: configuração da página, menu lateral e navegação."""
-import psycopg2
 import streamlit as st
 
 from marketplace.auth import sidebar_conta
 from marketplace.config import DATABASE_URL, ENV_PATH
+from marketplace.erros import ErroAplicacao, TabelaAusente
 from marketplace.paginas.anunciar import pagina_anunciar
 from marketplace.paginas.busca import pagina_busca
 from marketplace.paginas.dashboard import pagina_dashboard
@@ -54,7 +54,7 @@ with st.sidebar:
 
 try:
     PAGINAS[escolha]()
-except psycopg2.errors.UndefinedTable:
+except TabelaAusente:
     diagnostico_tabelas()
-except psycopg2.OperationalError as e:
-    st.error("Não foi possível conectar ao banco. Verifique a DATABASE_URL.")
+except ErroAplicacao as e:
+    st.error(str(e))

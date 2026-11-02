@@ -1,12 +1,11 @@
 """Página Loja: vitrine de anúncios e detalhe com compra, comentários e chat."""
-import psycopg2
 import streamlit as st
 
 from ..auth import current_user
 from ..components import card_preco, chat, comentarios
 from ..config import ESTADOS, METODOS_ENTREGA, METODOS_PAGAMENTO, TIPOS
-from ..db import db_error, query_df
-from ..services import buscar_anuncios, criar_transacao
+from ..erros import ErroAplicacao
+from ..services import anuncios, transacoes
 
 
 def pagina_loja():
@@ -15,7 +14,7 @@ def pagina_loja():
         return detalhe_anuncio(sel)
 
     st.header("🛍️ Anúncios disponíveis")
-    df = buscar_anuncios()
+    df = anuncios.buscar_anuncios()
     if df.empty:
         st.info("Nenhum anúncio disponível ainda.")
         return
@@ -63,7 +62,7 @@ def detalhe_anuncio(id_anuncio):
         st.session_state["anuncio_sel"] = None
         st.rerun()
 
-    df = buscar_anuncios(apenas_disponiveis=False, id_anuncio=id_anuncio)
+    df = anuncios.buscar_anuncios(apenas_disponiveis=False, id_anuncio=id_anuncio)
     if df.empty:
         st.error("Anúncio não encontrado.")
         return
@@ -71,10 +70,7 @@ def detalhe_anuncio(id_anuncio):
     user = current_user()
 
     col_fotos, col_info = st.columns([1, 1])
-    fotos = query_df(
-        "SELECT url_foto FROM foto_anuncio WHERE id_anuncio = %s ORDER BY id_foto",
-        (id_anuncio,),
-    )
+    fotos = anuncios.listar_fotos(id_anuncio)
     with col_fotos:
         if fotos.empty:
             st.info("Sem fotos.")
@@ -109,15 +105,15 @@ def detalhe_anuncio(id_anuncio):
                 metodo_ent = st.selectbox("Forma de entrega", METODOS_ENTREGA)
                 if st.form_submit_button(rotulo, width="stretch"):
                     try:
-                        id_t = criar_transacao(
-                            user["cpf"], id_anuncio, float(a["preco"]), metodo_pag, metodo_ent
+                        id_t = transacoes.criar_transacao(
+                            user["cpf"], id_anuncio, metodo_pag, metodo_ent
                         )
                         if id_t:
                             st.success(f"Transação #{id_t} criada! Acompanhe em 'Minhas compras'.")
                         else:
                             st.error("Este anúncio acabou de ser reservado por outra pessoa.")
-                    except psycopg2.Error as e:
-                        db_error(e)
+                    except ErroAplicacao as e:
+                        st.error(str(e))
 
     tab_com, tab_msg = st.tabs(["💬 Comentários", "✉️ Mensagem ao vendedor"])
     with tab_com:

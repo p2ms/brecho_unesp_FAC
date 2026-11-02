@@ -1,10 +1,10 @@
 """Sessão do usuário: login, cadastro e controle de acesso."""
 from datetime import date, timedelta
 
-import psycopg2
 import streamlit as st
 
-from .db import db_error, execute, query_df
+from .erros import ErroAplicacao
+from .services import usuarios
 
 
 def current_user():
@@ -33,12 +33,10 @@ def sidebar_conta():
         if modo == "Entrar":
             email = st.text_input("E-mail")
             if st.button("Entrar", width="stretch"):
-                df = query_df("SELECT * FROM usuario WHERE email = %s", (email.strip(),))
-                if df.empty:
+                u = usuarios.buscar_por_email(email)
+                if u is None:
                     st.error("E-mail não encontrado.")
                 else:
-                    u = df.iloc[0].to_dict()
-                    u["cpf"] = u["cpf"].strip()
                     st.session_state["user"] = u
                     st.rerun()
         else:
@@ -52,17 +50,8 @@ def sidebar_conta():
                     min_value=date(1920, 1, 1), max_value=limite,
                 )
                 if st.form_submit_button("Cadastrar", width="stretch"):
-                    if not (cpf.isdigit() and len(cpf) == 11):
-                        st.error("CPF deve ter 11 dígitos.")
-                    elif not nome.strip() or not email.strip():
-                        st.error("Preencha nome e e-mail.")
-                    else:
-                        try:
-                            execute(
-                                """INSERT INTO usuario (cpf, nome, email, data_nascimento)
-                                   VALUES (%s, %s, %s, %s)""",
-                                (cpf, nome.strip(), email.strip(), nasc),
-                            )
-                            st.success("Cadastro feito! Agora é só entrar.")
-                        except psycopg2.Error as e:
-                            db_error(e)
+                    try:
+                        usuarios.cadastrar(cpf, nome, email, nasc)
+                        st.success("Cadastro feito! Agora é só entrar.")
+                    except ErroAplicacao as e:
+                        st.error(str(e))

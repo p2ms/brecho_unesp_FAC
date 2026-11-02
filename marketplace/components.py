@@ -1,22 +1,14 @@
 """Componentes de interface reutilizados por mais de uma página."""
 import pandas as pd
-import psycopg2
 import streamlit as st
 
 from .auth import current_user
-from .db import db_error, execute, query_df
+from .erros import ErroAplicacao
+from .services import interacoes
 
 
 def chat(id_anuncio, meu_cpf, outro_cpf, key):
-    msgs = query_df(
-        """SELECT m.cpf_remetente, m.texto, m.data_hora, u.nome
-           FROM mensagem m JOIN usuario u ON u.cpf = m.cpf_remetente
-           WHERE m.id_anuncio = %s
-             AND ((m.cpf_remetente = %s AND m.cpf_destinatario = %s)
-               OR (m.cpf_remetente = %s AND m.cpf_destinatario = %s))
-           ORDER BY m.data_hora""",
-        (id_anuncio, meu_cpf, outro_cpf, outro_cpf, meu_cpf),
-    )
+    msgs = interacoes.listar_mensagens(id_anuncio, meu_cpf, outro_cpf)
     if msgs.empty:
         st.caption("Nenhuma mensagem ainda.")
     for _, m in msgs.iterrows():
@@ -29,37 +21,24 @@ def chat(id_anuncio, meu_cpf, outro_cpf, key):
         texto = st.text_area("Nova mensagem", height=80)
         if st.form_submit_button("Enviar") and texto.strip():
             try:
-                execute(
-                    """INSERT INTO mensagem (cpf_remetente, cpf_destinatario, id_anuncio, texto)
-                       VALUES (%s, %s, %s, %s)""",
-                    (meu_cpf, outro_cpf, id_anuncio, texto.strip()),
-                )
+                interacoes.enviar_mensagem(meu_cpf, outro_cpf, id_anuncio, texto)
                 st.rerun()
-            except psycopg2.Error as e:
-                db_error(e)
+            except ErroAplicacao as e:
+                st.error(str(e))
 
 
 def comentarios(id_anuncio):
-    df = query_df(
-        """SELECT c.texto, c.data_hora, u.nome
-           FROM comentario c JOIN usuario u ON u.cpf = c.cpf_comentador
-           WHERE c.id_anuncio = %s ORDER BY c.data_hora DESC""",
-        (id_anuncio,),
-    )
+    df = interacoes.listar_comentarios(id_anuncio)
     user = current_user()
     if user:
         with st.form(f"form_coment_{id_anuncio}", clear_on_submit=True):
             texto = st.text_area("Comentar", height=80)
             if st.form_submit_button("Publicar comentário") and texto.strip():
                 try:
-                    execute(
-                        """INSERT INTO comentario (cpf_comentador, id_anuncio, texto)
-                           VALUES (%s, %s, %s)""",
-                        (user["cpf"], id_anuncio, texto.strip()),
-                    )
+                    interacoes.publicar_comentario(user["cpf"], id_anuncio, texto)
                     st.rerun()
-                except psycopg2.Error as e:
-                    db_error(e)
+                except ErroAplicacao as e:
+                    st.error(str(e))
     else:
         st.caption("Entre na sua conta para comentar.")
 

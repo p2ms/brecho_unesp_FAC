@@ -33,11 +33,18 @@ entrega e avaliam o vendedor. Um **dashboard analítico** mostra como o mercado 
 app.py                     # ponto de entrada: configuração da página, menu lateral e navegação
 marketplace/
 ├── config.py              # DATABASE_URL (.env / Secrets) e constantes do domínio
+├── erros.py               # erros da aplicação, com mensagem pronta para a tela
 ├── db.py                  # conexão, query_df, execute e run_tx (transações)
+├── services/              # "backend": regras de negócio, permissões e todo o SQL
+│   ├── anuncios.py        # anúncios, categorias, tags e busca avançada
+│   ├── transacoes.py      # compra, pagamento, entrega, avaliação e suporte
+│   ├── interacoes.py      # mensagens e comentários
+│   ├── usuarios.py        # login, cadastro, perfil e cartões
+│   ├── analises.py        # consultas do Dashboard
+│   └── diagnostico.py     # conexão e tabelas visíveis
 ├── auth.py                # usuário logado, require_login e menu de login/cadastro
-├── services.py            # regras de negócio: anúncios e ciclo da transação
 ├── components.py          # chat, comentários e card de preço
-└── paginas/               # uma função pagina_* por página
+└── paginas/               # só interface: uma função pagina_* por página
     ├── loja.py            # vitrine + detalhe do anúncio
     ├── busca.py           # busca avançada
     ├── anunciar.py
@@ -47,6 +54,9 @@ marketplace/
     ├── dashboard.py
     └── diagnostico.py     # ajuda quando o banco não tem as tabelas
 ```
+
+As telas não têm SQL nem acessam o banco: chamam `services`, que não conhece o Streamlit.
+Operações de uma transação recebem o CPF de quem as solicita e conferem a permissão no próprio serviço.
 
 ### Técnicas de SQL usadas
 
