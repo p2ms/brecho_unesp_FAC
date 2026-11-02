@@ -9,9 +9,11 @@ from .services import transacoes
 _PARAMETROS = {"loja": ("q", "categoria"), "anuncio": ("id",), "conta": ("aba",)}
 
 
-def _linha(rotulo, nome, atual, parametros=None, chave=None):
+def _linha(rotulo, icone, nome, atual, parametros=None, chave=None):
     with st.container(key="menu_ativo" if nome == atual and not chave else f"menu_{chave or nome}"):
-        st.page_link(pagina(nome), label=rotulo, query_params=parametros, width="stretch")
+        st.page_link(
+            pagina(nome), label=rotulo, icon=f":material/{icone}:", query_params=parametros, width="stretch"
+        )
 
 
 def _busca(atual):
@@ -23,7 +25,7 @@ def _busca(atual):
             st.session_state["_busca_ultima"] = q
 
     with st.container(key="menu_busca"):
-        termo = st.text_input("Busca", key="busca_menu", placeholder="título, item, marca ou tag").strip()
+        termo = st.text_input(":material/search: Busca", key="busca_menu", placeholder="título, item, marca ou tag").strip()
     if termo != st.session_state["_busca_ultima"]:
         st.session_state["_busca_ultima"] = termo
         if atual != "loja":
@@ -49,14 +51,14 @@ def menu(pagina_atual):
     with st.sidebar:
         with st.container(key="menu_marca"):
             st.page_link(pagina("loja"), label="Brechó da Unesp", width="stretch")
-        _linha("Loja", "loja", atual)
-        _linha("Anunciar", "anunciar", atual)
-        _linha("Minha loja", "minha_loja", atual)
-        _linha("Mensagens", "mensagens", atual)
-        _linha("Painel", "painel", atual)
+        _linha("Loja", "storefront", "loja", atual)
+        _linha("Anunciar", "sell", "anunciar", atual)
+        _linha("Minha loja", "store", "minha_loja", atual)
+        _linha("Mensagens", "mail", "mensagens", atual)
+        _linha("Painel", "bar_chart", "painel", atual)
         pendentes = f" ({transacoes.contar_pendentes(user['cpf'])})" if user else ""
-        _linha(f"Sacola{pendentes}", "conta", atual, {"aba": "compras"}, chave="sacola")
-        _linha("Minha conta", "conta", atual)
+        _linha(f"Sacola{pendentes}", "shopping_bag", "conta", atual, {"aba": "compras"}, chave="sacola")
+        _linha("Minha conta", "person", "conta", atual)
         _busca(pagina_atual)
         with st.container(key="menu_sol"):
             st.html(sol_html())

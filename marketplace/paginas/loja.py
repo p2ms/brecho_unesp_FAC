@@ -9,7 +9,8 @@ from ..estilo import VINHO, sol_html
 from ..navegacao import pagina, trilha
 from ..services import anuncios, transacoes
 
-POR_PAGINA = 9
+COLUNAS = 4
+POR_PAGINA = 12
 
 
 def _capa():
@@ -71,8 +72,7 @@ def _card(a):
         else:
             st.html(f'<div class="sem-foto">{sol_html(96)}</div>')
         st.subheader(a["titulo"])
-        st.caption(f"{a['estado']} · {a['categoria']}")
-        st.caption(a["vendedor"])
+        st.caption(f"{a['estado']} · {a['categoria']} · {a['vendedor']}")
         st.markdown(f"**{card_preco(a)}**")
         st.page_link(
             pagina("anuncio"), label="Ver detalhes", width="stretch",
@@ -103,10 +103,12 @@ def pagina_loja():
             f"{len(df)} anúncio(s) · preço médio R\\$ {df['preco'].mean():.2f} · "
             f"mediana R\\$ {df['preco'].median():.2f}"
         )
-        cols = st.columns(3)
-        for i, (_, a) in enumerate(df.head(limite).iterrows()):
-            with cols[i % 3]:
-                _card(a)
+        visiveis = df.head(limite)
+        for inicio in range(0, len(visiveis), COLUNAS):  # uma linha por vez, para as linhas ficarem alinhadas
+            linha = visiveis.iloc[inicio:inicio + COLUNAS]
+            for col, (_, a) in zip(st.columns(COLUNAS), linha.iterrows()):
+                with col:
+                    _card(a)
         if len(df) > limite:
             st.button("Ver mais anúncios", on_click=_mostrar_mais, width="stretch")
 

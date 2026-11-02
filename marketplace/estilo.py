@@ -46,6 +46,13 @@ _CSS = """
     letter-spacing: 0.3em;
     text-transform: uppercase;
 }
+/* Os ícones são ligaduras de fonte: em maiúsculas, viram texto */
+[data-testid="stSidebar"] [data-testid="stIconMaterial"],
+[data-testid="stSidebar"] span[role="img"] {
+    color: #000000;
+    letter-spacing: 0;
+    text-transform: none;
+}
 .st-key-menu_marca a,
 .st-key-menu_ativo a,
 [class*="st-key-menu_"] a:hover {
@@ -65,9 +72,22 @@ _CSS = """
 .st-key-menu_sol {
     padding: 32px;
 }
-.st-key-trilha {
-    padding-bottom: 12px;
+[data-testid="stHeader"] {
+    height: 2.75rem !important;
+    min-height: 2.75rem !important;
+    background: #FFFFFF;
+}
+[data-testid="stLayoutWrapper"]:has(> .st-key-trilha) {
+    position: sticky;
+    top: 2.75rem;
+    z-index: 100;
+    box-sizing: border-box;
+    width: calc(100% + var(--margem) * 2);
+    max-width: none;
+    margin: 0 calc(var(--margem) * -1);
+    padding: 0 var(--margem) 12px;
     border-bottom: 1px solid #FE0B5D;
+    background: #FFFFFF;
 }
 .st-key-trilha a {
     padding: 0;
@@ -95,7 +115,7 @@ _CSS = """
 [data-testid="stMainBlockContainer"] {
     --margem: 2rem;
     max-width: none;
-    padding: 3.5rem var(--margem) 4rem;
+    padding: 2.75rem var(--margem) 4rem;
 }
 @media (max-width: 640px) {
     [data-testid="stMainBlockContainer"] {
@@ -158,10 +178,32 @@ _CSS = """
     align-items: center;
     gap: 1.5rem;
 }
+/* Cards da mesma linha com a mesma altura e o botão sempre no rodapé */
+[data-testid="stHorizontalBlock"]:has([class*="st-key-card_anuncio_"]) {
+    align-items: stretch;
+}
+[data-testid="stColumn"]:has([class*="st-key-card_anuncio_"]) > [data-testid="stVerticalBlock"],
+[data-testid="stColumn"]:has([class*="st-key-card_anuncio_"]) [data-testid="stLayoutWrapper"] {
+    height: 100%;
+}
+[class*="st-key-card_anuncio_"] {
+    height: 100%;
+    gap: 0;
+    padding: 0 0 1rem;
+}
+[class*="st-key-card_anuncio_"] > [data-testid="stElementContainer"]:not(:has(.card-tipo, .sem-foto, [data-testid="stImage"])) {
+    box-sizing: border-box;
+    padding: 0.5rem 1rem 0;
+}
+[class*="st-key-card_anuncio_"] > [data-testid="stElementContainer"]:has([data-testid="stPageLink"]) {
+    margin-top: auto;
+}
+[class*="st-key-card_anuncio_"] [data-testid="stImage"],
+[class*="st-key-card_anuncio_"] [data-testid="stImageContainer"] {
+    width: 100%;
+}
 .card-tipo {
-    margin: -1rem -1rem 0;
     padding: 0.5rem 1rem;
-    border-bottom: 1px solid #FE0B5D;
     background: #FCEBF2;
     font-size: 12px;
     letter-spacing: 0.3em;
@@ -171,20 +213,21 @@ _CSS = """
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 220px;
+    aspect-ratio: 1 / 1;
 }
 .sem-foto.grande {
     flex-direction: column;
     gap: 1rem;
-    height: auto;
+    aspect-ratio: auto;
     min-height: 440px;
     background: #FE0B5D;
     font-size: 13px;
     letter-spacing: 0.3em;
 }
 [class*="st-key-card_anuncio_"] [data-testid="stImage"] img {
+    display: block;
     width: 100%;
-    height: 220px;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
 }
 [class*="st-key-card_anuncio_"] a {
