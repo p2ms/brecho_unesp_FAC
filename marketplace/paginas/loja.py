@@ -2,7 +2,7 @@
 import streamlit as st
 
 from ..auth import current_user
-from ..components import card_preco, chat, comentarios
+from ..components import card_preco, chat, comentarios, eh_link
 from ..config import ESTADOS, METODOS_ENTREGA, METODOS_PAGAMENTO, TIPOS
 from ..erros import ErroAplicacao
 from ..services import anuncios, transacoes
@@ -44,7 +44,7 @@ def pagina_loja():
     cols = st.columns(3)
     for i, (_, a) in enumerate(df.iterrows()):
         with cols[i % 3].container(border=True):
-            if a["foto"]:
+            if eh_link(a["foto"]):
                 st.image(a["foto"], width="stretch")
             st.subheader(a["titulo"])
             st.caption(f"{a['tipo']} · {a['estado']} · {a['nome_categoria']}")
@@ -70,12 +70,12 @@ def detalhe_anuncio(id_anuncio):
     user = current_user()
 
     col_fotos, col_info = st.columns([1, 1])
-    fotos = anuncios.listar_fotos(id_anuncio)
+    fotos = [f for f in anuncios.listar_fotos(id_anuncio)["url_foto"] if eh_link(f)]
     with col_fotos:
-        if fotos.empty:
+        if not fotos:
             st.info("Sem fotos.")
         else:
-            st.image(list(fotos["url_foto"]), width="stretch")
+            st.image(fotos, width="stretch")
 
     with col_info:
         st.title(a["titulo"])

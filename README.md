@@ -80,6 +80,13 @@ streamlit run app.py
 1. Suba `app.py`, `requirements.txt`, `.gitignore` e `README.md` para o GitHub (**nunca** o `.env`).
 2. Em share.streamlit.io: *New app* → escolha o repositório, branch `main`, arquivo `app.py`.
 3. Em *Advanced settings → Secrets*, cole: `DATABASE_URL = "postgresql://...neon.tech/neondb?sslmode=require"`
+4. Nos mesmos Secrets, adicione `SUPABASE_URL` e `SUPABASE_SERVICE_KEY` para o envio de fotos.
+
+## Fotos dos anúncios
+
+As fotos enviadas em Anunciar vão para o bucket público `fotos-anuncios` do Supabase Storage, e a tabela
+`foto_anuncio` guarda o link. Sem `SUPABASE_URL` e `SUPABASE_SERVICE_KEY`, só é possível publicar sem fotos.
+A chave de serviço dá acesso total ao projeto: use-a apenas no `.env` ou nos Secrets, nunca no código.
 
 ## Observações
 

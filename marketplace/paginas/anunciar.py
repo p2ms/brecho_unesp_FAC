@@ -39,7 +39,10 @@ def pagina_anunciar():
             "Prazo do empréstimo (dias)", min_value=1, step=1,
             disabled=(tipo != "Empréstimo"),
         )
-        fotos = st.text_area("URLs das fotos (uma por linha)")
+        fotos = st.file_uploader(
+            "Fotos (até 5, em JPG, PNG ou WebP, com até 5 MB cada)",
+            type=["jpg", "jpeg", "png", "webp"], accept_multiple_files=True,
+        )
 
         st.subheader("Item")
         item = st.text_input("Nome do item")
@@ -55,7 +58,7 @@ def pagina_anunciar():
             dados = {
                 "titulo": titulo.strip(), "descricao": descricao.strip(),
                 "preco": preco, "tipo": tipo, "prazo": int(prazo),
-                "fotos": [u.strip() for u in fotos.splitlines() if u.strip()],
+                "fotos": [f.getvalue() for f in fotos],
                 "item": item.strip(), "marca": marca.strip(), "estado": estado,
                 "categoria": categoria, "descricao_item": descricao_item.strip(),
                 "reestocavel": reestocavel,

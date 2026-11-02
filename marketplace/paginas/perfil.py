@@ -2,6 +2,7 @@
 import streamlit as st
 
 from ..auth import require_login
+from ..components import eh_link
 from ..erros import ErroAplicacao
 from ..services import usuarios
 
@@ -15,7 +16,7 @@ def pagina_perfil():
 
     c1, c2 = st.columns([1, 3])
     with c1:
-        if atual["foto"]:
+        if eh_link(atual["foto"]):
             st.image(atual["foto"], width="stretch")
         else:
             st.markdown("# :material/account_circle:")

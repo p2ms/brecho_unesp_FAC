@@ -137,8 +137,8 @@ def funil_transacoes():
                   COUNT(*) FILTER (WHERE e.status = 'Recebido') AS recebidas,
                   COUNT(*) FILTER (WHERE t.status = 'Concluída') AS concluidas
            FROM transacao t
-           JOIN pagamento p ON p.id_transacao = t.id_transacao
-           JOIN entrega e ON e.id_transacao = t.id_transacao"""
+           LEFT JOIN pagamento p ON p.id_transacao = t.id_transacao
+           LEFT JOIN entrega e ON e.id_transacao = t.id_transacao"""
     ).iloc[0]
 
 
