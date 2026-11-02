@@ -5,7 +5,8 @@ import plotly.express as px
 import streamlit as st
 
 ROSA = "#FE0B5D"
-CORES_GRAFICOS = [ROSA, "#1F5FA8", "#B3013B", "#C77700"]
+VINHO = "#B3013B"
+CORES_GRAFICOS = [ROSA, "#1F5FA8", VINHO, "#C77700"]
 
 _SOL = (
     "M96.8 39.2Q90.9 42.2 68.9 53.2Q86.1 70.6 90.7 75.4Q84.4 73.4 61.1 65.6Q60.9 90.1 60.8 96.8"
@@ -16,12 +17,118 @@ _SOL = (
 
 _CSS = """
 <style>
-[data-testid="stSidebar"] h1 {
-    font-family: "Jost", sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
+[data-testid="stSidebar"] {
+    box-sizing: border-box;
+    border-right: 1px solid #FE0B5D !important;
+}
+[data-testid="stSidebarContent"] {
+    scrollbar-gutter: auto !important;
+}
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarUserContent"] {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+[class*="st-key-menu_"] [data-testid="stElementContainer"] {
+    margin: 0;
+}
+[data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] {
+    gap: 0;
+}
+[class*="st-key-menu_"] a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 32px;
+    border-radius: 0;
+    border-bottom: 1px solid #FE0B5D;
+}
+[class*="st-key-menu_"] a p {
+    color: #000000;
+    font-size: 15px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
+}
+/* Os ícones são ligaduras de fonte: em maiúsculas, viram texto */
+[data-testid="stSidebar"] [data-testid="stIconMaterial"],
+[data-testid="stSidebar"] span[role="img"] {
+    color: #000000;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.st-key-menu_ativo a,
+[class*="st-key-menu_"] a:hover {
+    background: #FE0B5D;
+}
+.st-key-menu_marca a {
+    background: #FFD3E2;
+}
+/* O botão de recolher fica sobre a primeira linha, para o menu começar no topo */
+[data-testid="stSidebarHeader"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    width: auto;
+    height: 48px;
+    padding: 0 0.5rem;
+    align-items: center;
+}
+.st-key-menu_busca {
+    padding: 10px 32px;
+    border-bottom: 1px solid #FE0B5D;
+}
+.st-key-menu_busca label p {
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+.st-key-menu_sol {
+    padding: 32px;
+}
+/* A barra do breadcrumb é a primeira coisa da página: o cabeçalho só deixa os botões por cima dela */
+[data-testid="stHeader"] {
+    height: 48px !important;
+    min-height: 48px !important;
+    background: transparent;
+    pointer-events: none;
+}
+[data-testid="stHeader"] button {
+    pointer-events: auto;
+}
+[data-testid="stLayoutWrapper"]:has(> .st-key-trilha) {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: calc(100% + var(--margem) * 2);
+    max-width: none;
+    height: 48px;
+    margin: -1rem calc(var(--margem) * -1) 0; /* compensa o espaço dos blocos invisíveis de CSS e script */
+    padding: 0 var(--margem);
+    border-bottom: 1px solid #FE0B5D;
+    background: #FFFFFF;
+}
+[data-testid="stApp"]:has([data-testid="stExpandSidebarButton"]) [data-testid="stLayoutWrapper"]:has(> .st-key-trilha) {
+    padding-left: 3.5rem;
+}
+.st-key-trilha [data-testid="stElementContainer"] {
+    margin: 0;
+}
+.st-key-trilha a {
+    padding: 0;
+}
+.st-key-trilha a p,
+.st-key-trilha [data-testid="stText"] {
+    color: #000000;
+    font-family: "Jost", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.24em;
 }
 /* O rosa não dá contraste com texto branco: botões principais usam texto preto */
 [data-testid="stBaseButton-primary"],
@@ -36,7 +143,150 @@ _CSS = """
     line-height: 1.2;
     padding-top: 0;
 }
+[data-testid="stMainBlockContainer"] {
+    --margem: 2rem;
+    max-width: none;
+    padding: 0 var(--margem) 4rem;
+}
+@media (max-width: 640px) {
+    [data-testid="stMainBlockContainer"] {
+        --margem: 1rem;
+    }
+}
+[data-testid="stMain"] h1,
+[data-testid="stMain"] h2 {
+    font-family: "Spectral", serif;
+    font-weight: 300;
+}
+.capa {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 440px;
+    box-sizing: border-box;
+    margin: -1rem calc(var(--margem) * -1) 0;
+    padding: 2rem var(--margem);
+    background: #FE0B5D;
+    color: #000000;
+}
+.capa img {
+    position: absolute;
+    top: -120px;
+    right: -80px;
+}
+.capa h1 {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    color: #000000;
+    font-family: "Spectral", serif;
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    font-weight: 300;
+    line-height: 1.02;
+    letter-spacing: 0.04em;
+}
+.capa p {
+    position: relative;
+    margin: 1rem 0 0;
+    font-size: 1.125rem;
+}
+.faixa {
+    display: flex;
+    gap: 3rem;
+    overflow: hidden;
+    margin: -1rem calc(var(--margem) * -1) 0;
+    padding: 0.8rem var(--margem);
+    border-bottom: 1px solid #FE0B5D;
+    font-size: 15px;
+    letter-spacing: 0.38em;
+    white-space: nowrap;
+}
+.faixa span {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 1.5rem;
+}
+/* Cards da mesma linha com a mesma altura e o botão sempre no rodapé */
+[data-testid="stHorizontalBlock"]:has([class*="st-key-card_anuncio_"]) {
+    align-items: stretch;
+}
+[data-testid="stColumn"]:has([class*="st-key-card_anuncio_"]) > [data-testid="stVerticalBlock"],
+[data-testid="stColumn"]:has([class*="st-key-card_anuncio_"]) [data-testid="stLayoutWrapper"] {
+    height: 100%;
+}
+[class*="st-key-card_anuncio_"] {
+    height: 100%;
+    gap: 0;
+    padding: 0 0 1rem;
+}
+[class*="st-key-card_anuncio_"] > [data-testid="stElementContainer"]:not(:has(.card-tipo, .sem-foto, [data-testid="stImage"])) {
+    box-sizing: border-box;
+    padding: 0.5rem 1rem 0;
+}
+[class*="st-key-card_anuncio_"] > [data-testid="stElementContainer"]:has([data-testid="stPageLink"]) {
+    margin-top: auto;
+}
+[class*="st-key-card_anuncio_"] [data-testid="stImage"],
+[class*="st-key-card_anuncio_"] [data-testid="stImageContainer"] {
+    width: 100%;
+}
+.card-tipo {
+    padding: 0.5rem 1rem;
+    background: #FCEBF2;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+.sem-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+}
+.sem-foto.grande {
+    flex-direction: column;
+    gap: 1rem;
+    aspect-ratio: auto;
+    min-height: 440px;
+    background: #FE0B5D;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+}
+[class*="st-key-card_anuncio_"] [data-testid="stImage"] img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+[class*="st-key-card_anuncio_"] a {
+    justify-content: center;
+    border: 1px solid #FE0B5D;
+    border-radius: 0;
+}
 </style>
+"""
+
+
+# No celular, o Streamlit deixa o menu aberto ao carregar e ao usar st.page_link, cobrindo a página
+_FECHAR_MENU_NO_CELULAR = """
+<script>
+if (!window.brechoFecharMenu) {
+    window.brechoFecharMenu = () => {
+        if (window.innerWidth < 768) {
+            document.querySelector('[data-testid="stSidebarCollapseButton"] button')?.click();
+        }
+    };
+    setTimeout(window.brechoFecharMenu, 800);
+    document.addEventListener("click", (e) => {
+        if (e.target.closest('[data-testid="stSidebar"] a')) {
+            window.brechoFecharMenu();
+        }
+    });
+}
+</script>
 """
 
 
@@ -48,12 +298,13 @@ def sol_svg(tamanho=144, cor=ROSA):
     )
 
 
-def sol_html(tamanho=144):
+def sol_html(tamanho=144, cor=ROSA):
     """Sol como imagem: st.html remove tags <svg> ao sanitizar o conteúdo."""
-    dados = base64.b64encode(sol_svg(tamanho).encode()).decode()
+    dados = base64.b64encode(sol_svg(tamanho, cor).encode()).decode()
     return f'<img alt="" width="{tamanho}" height="{tamanho}" src="data:image/svg+xml;base64,{dados}">'
 
 
 def aplicar_estilo():
     px.defaults.color_discrete_sequence = CORES_GRAFICOS  # o tema não alcança as pizzas
     st.html(_CSS)
+    st.html(_FECHAR_MENU_NO_CELULAR, unsafe_allow_javascript=True)

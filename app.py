@@ -1,20 +1,19 @@
 """Ponto de entrada do Streamlit: configuração da página, menu lateral e navegação."""
 import streamlit as st
 
-from marketplace.auth import sidebar_conta
 from marketplace.config import DATABASE_URL, ENV_PATH
 from marketplace.erros import ErroAplicacao, TabelaAusente
-from marketplace.estilo import aplicar_estilo, sol_html, sol_svg
-from marketplace.paginas.anunciar import pagina_anunciar
-from marketplace.paginas.busca import pagina_busca
-from marketplace.paginas.dashboard import pagina_dashboard
+from marketplace.estilo import aplicar_estilo, sol_svg
+from marketplace.menu import menu
+from marketplace.navegacao import registrar
 from marketplace.paginas.diagnostico import diagnostico_tabelas
-from marketplace.paginas.loja import pagina_loja
-from marketplace.paginas.mensagens import pagina_mensagens
-from marketplace.paginas.meus_anuncios import pagina_minha_loja
-from marketplace.paginas.perfil import pagina_perfil
-from marketplace.paginas.transacoes import pagina_compras, pagina_vendas
+from marketplace.rotas import criar_paginas
 
+paginas = criar_paginas()
+registrar(paginas)
+atual = st.navigation(list(paginas.values()), position="hidden")
+
+# Depois de st.navigation, que trocaria o título da aba pelo nome da página
 st.set_page_config(page_title="Brechó da Unesp", page_icon=sol_svg(64), layout="wide")
 aplicar_estilo()
 
@@ -35,30 +34,9 @@ Publicado no Streamlit Cloud? Defina `DATABASE_URL` em *Settings → Secrets*.
     )
     st.stop()
 
-
-# ---------------------------------------------------------------
-# Navegação
-# ---------------------------------------------------------------
-sidebar_conta()
-
-PAGINAS = {
-    ":material/storefront: Loja": pagina_loja,
-    ":material/search: Busca avançada": pagina_busca,
-    ":material/sell: Anunciar": pagina_anunciar,
-    ":material/store: Minha loja": pagina_minha_loja,
-    ":material/mail: Mensagens": pagina_mensagens,
-    ":material/package_2: Minhas compras": pagina_compras,
-    ":material/work: Minhas vendas": pagina_vendas,
-    ":material/person: Perfil": pagina_perfil,
-    ":material/bar_chart: Dashboard": pagina_dashboard,
-}
-with st.sidebar:
-    st.divider()
-    escolha = st.radio("Navegação", list(PAGINAS), label_visibility="collapsed")
-    st.html(sol_html())
-
 try:
-    PAGINAS[escolha]()
+    menu(next(nome for nome, p in paginas.items() if p.url_path == atual.url_path))
+    atual.run()
 except TabelaAusente:
     diagnostico_tabelas()
 except ErroAplicacao as e:

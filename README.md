@@ -2,7 +2,7 @@
 
 Marketplace de compra, venda e empréstimo de itens.
 
-Aplicação web feita com **Streamlit** e **PostgreSQL (Neon)** para o Trabalho de Banco de Dados II (Parte 1),
+Aplicação web feita com **Streamlit** e **PostgreSQL (Supabase)** para o Trabalho de Banco de Dados II (Parte 1),
 sobre o banco de dados modelado em Banco de Dados I.
 
 **Link da aplicação:** _(cole aqui o link do Streamlit Community Cloud)_
@@ -14,21 +14,20 @@ entrega e avaliam o vendedor. Um **dashboard analítico** mostra como o mercado 
 
 ## Temas do trabalho atendidos
 
-- **Buscas complexas de forma simplificada + inserção de dados** (páginas Loja, Busca avançada, Anunciar, etc.)
-- **Análise visual e estatística** (página Dashboard, com 4 abas e mais de 15 consultas)
+- **Buscas complexas de forma simplificada + inserção de dados** (páginas Loja, Anunciar, Minha loja, etc.)
+- **Análise visual e estatística** (página Painel, com 4 abas e mais de 15 consultas)
 
 ## Páginas
 
 | Página | O que faz | Tabelas envolvidas |
 |---|---|---|
-| Loja | Lista anúncios com filtros; detalhe com fotos, comentários e chat; compra/empréstimo | anuncio, item, usuario, foto_anuncio, item_tag, emprestimo, comentario, mensagem |
-| Busca avançada | Filtros combinados: texto, categoria **com subcategorias (CTE recursiva)**, tags (todas), estado, tipo, preço, nota do vendedor, data | anuncio, item, categoria, item_tag, usuario, avaliacao, comentario |
+| Loja | Vitrine com busca e "Mais filtros" combinados: texto, categoria **com subcategorias (CTE recursiva)**, tags (todas), estado, tipo, preço, nota do vendedor e data; mostra o SQL gerado | anuncio, item, categoria, item_tag, usuario, avaliacao, comentario, foto_anuncio, emprestimo |
+| Anúncio | Detalhe com fotos, comentários e chat; compra/empréstimo | anuncio, item, usuario, foto_anuncio, item_tag, emprestimo, comentario, mensagem, transacao |
 | Anunciar | Cria item, tags, anúncio, empréstimo e fotos **em uma única transação** | item, tag, item_tag, anuncio, emprestimo, foto_anuncio, categoria |
 | Mensagens | Caixa de entrada por anúncio | mensagem, anuncio, usuario |
 | Minha loja | Edita e apaga os próprios anúncios que ainda não têm transação | anuncio, item, item_tag, emprestimo, foto_anuncio, transacao |
-| Minhas compras / vendas | Pagamento, envio, recebimento, avaliação e suporte; em vendas, também lista os anúncios que não podem mais ser editados | transacao, pagamento, entrega, avaliacao, suporte, anuncio |
-| Perfil | Dados, nota média e cartões | usuario, avaliacao, cartao |
-| Dashboard | Análises (ver abaixo) | todas |
+| Minha conta | Login e cadastro; seções Compras e Vendas (pagamento, envio, recebimento, avaliação e suporte; em Vendas, também os anúncios que não podem mais ser editados) e Perfil (dados, nota média e cartões). A Sacola abre em Compras | usuario, transacao, pagamento, entrega, avaliacao, suporte, anuncio, cartao |
+| Painel | Análises visuais e estatísticas | todas |
 
 ## Estrutura do código
 
@@ -38,6 +37,9 @@ app.py                     # ponto de entrada: configuração da página, menu l
 marketplace/
 ├── config.py              # DATABASE_URL (.env / Secrets) e constantes do domínio
 ├── estilo.py              # CSS que o tema não cobre e desenho do sol
+├── rotas.py               # páginas do app e seus endereços
+├── menu.py                # menu lateral: páginas, sacola, conta e busca
+├── navegacao.py           # acesso às páginas registradas e breadcrumb
 ├── erros.py               # erros da aplicação, com mensagem pronta para a tela
 ├── db.py                  # conexão, query_df, execute e run_tx (transações)
 ├── services/              # "backend": regras de negócio, permissões e todo o SQL
@@ -45,19 +47,20 @@ marketplace/
 │   ├── transacoes.py      # compra, pagamento, entrega, avaliação e suporte
 │   ├── interacoes.py      # mensagens e comentários
 │   ├── usuarios.py        # login, cadastro, perfil e cartões
-│   ├── analises.py        # consultas do Dashboard
+│   ├── analises.py        # consultas do Painel
+│   ├── armazenamento.py   # envio de fotos ao Supabase Storage
 │   └── diagnostico.py     # conexão e tabelas visíveis
-├── auth.py                # usuário logado, require_login e menu de login/cadastro
+├── auth.py                # usuário logado, require_login e formulário de login/cadastro
 ├── components.py          # chat, comentários e card de preço
 └── paginas/               # só interface: uma função pagina_* por página
-    ├── loja.py            # vitrine + detalhe do anúncio
-    ├── busca.py           # busca avançada
+    ├── loja.py            # capa, vitrine com busca e detalhe do anúncio
     ├── anunciar.py
     ├── meus_anuncios.py   # minha loja: edita e apaga anúncios sem transação
     ├── mensagens.py
-    ├── transacoes.py      # minhas compras / minhas vendas
-    ├── perfil.py
-    ├── dashboard.py
+    ├── conta.py           # minha conta: login e seções
+    ├── transacoes.py      # seções Compras e Vendas
+    ├── perfil.py          # seção Perfil
+    ├── dashboard.py       # painel
     └── diagnostico.py     # ajuda quando o banco não tem as tabelas
 ```
 
@@ -77,16 +80,26 @@ git clone <url-do-repositorio>
 cd <pasta>
 python -m venv venv && source venv/bin/activate     # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env                                  # preencha DATABASE_URL (string do Neon)
+cp .env.example .env                                  # preencha DATABASE_URL e as chaves do Supabase
 streamlit run app.py
 ```
 
+Rode a partir da raiz do projeto: o tema em `.streamlit/config.toml` só é lido nessa pasta.
+
 ## Deploy (Streamlit Community Cloud)
 
-1. Suba `app.py`, `requirements.txt`, `.gitignore` e `README.md` para o GitHub (**nunca** o `.env`).
-2. Em share.streamlit.io: *New app* → escolha o repositório, branch `main`, arquivo `app.py`.
-3. Em *Advanced settings → Secrets*, cole: `DATABASE_URL = "postgresql://...neon.tech/neondb?sslmode=require"`
-4. Nos mesmos Secrets, adicione `SUPABASE_URL` e `SUPABASE_SERVICE_KEY` para o envio de fotos.
+1. O `.env` nunca vai para o GitHub: as credenciais ficam nos Secrets do app.
+2. No Supabase, em *Connect*, copie a URI do **Session pooler**. A conexão direta só funciona por IPv6, que o Streamlit Cloud não usa.
+3. Em share.streamlit.io: *New app* → escolha o repositório, branch `main`, arquivo `app.py`.
+4. Em *Advanced settings → Secrets*, cole `DATABASE_URL`, `SUPABASE_URL` e `SUPABASE_SERVICE_KEY`:
+
+```toml
+DATABASE_URL = "postgresql://postgres.PROJETO:SENHA@HOST.pooler.supabase.com:5432/postgres"
+SUPABASE_URL = "https://PROJETO.supabase.co"
+SUPABASE_SERVICE_KEY = "sua-chave-de-servico"
+```
+
+Caracteres especiais da senha precisam estar codificados na URI, como no `.env`.
 
 ## Fotos dos anúncios
 
