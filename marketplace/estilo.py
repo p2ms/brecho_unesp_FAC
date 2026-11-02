@@ -162,7 +162,7 @@ _CSS = """
     justify-content: flex-end;
     min-height: 440px;
     box-sizing: border-box;
-    margin: 0 calc(var(--margem) * -1);
+    margin: -1rem calc(var(--margem) * -1) 0;
     padding: 2rem var(--margem);
     background: #FE0B5D;
     color: #000000;
@@ -192,7 +192,7 @@ _CSS = """
     display: flex;
     gap: 3rem;
     overflow: hidden;
-    margin: 0 calc(var(--margem) * -1);
+    margin: -1rem calc(var(--margem) * -1) 0;
     padding: 0.8rem var(--margem);
     border-bottom: 1px solid #FE0B5D;
     font-size: 15px;
