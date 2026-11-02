@@ -7,7 +7,7 @@ from ..services import anuncios
 
 
 def pagina_busca():
-    st.header("🔍 Busca avançada")
+    st.header(":material/search: Busca avançada")
     st.caption(
         "Combine filtros de várias tabelas: a busca junta anúncio, item, categoria "
         "(com subcategorias), tags, vendedor e avaliações."
@@ -51,7 +51,7 @@ def pagina_busca():
             df, width="stretch", hide_index=True,
             column_config={
                 "preco": st.column_config.NumberColumn("preço", format="R$ %.2f"),
-                "nota_vendedor": st.column_config.NumberColumn("nota vendedor", format="%.1f ⭐"),
+                "nota_vendedor": st.column_config.NumberColumn("nota vendedor", format="%.1f ★"),
             },
         )
         with st.expander("Ver SQL gerado"):

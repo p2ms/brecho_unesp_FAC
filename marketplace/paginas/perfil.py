@@ -8,7 +8,7 @@ from ..services import usuarios
 
 def pagina_perfil():
     user = require_login()
-    st.header("👤 Meu perfil")
+    st.header(":material/person: Meu perfil")
 
     atual = usuarios.obter_perfil(user["cpf"])
     media = usuarios.nota_media(user["cpf"])
@@ -18,12 +18,12 @@ def pagina_perfil():
         if atual["foto"]:
             st.image(atual["foto"], width="stretch")
         else:
-            st.markdown("# 🙂")
+            st.markdown("# :material/account_circle:")
     with c2:
         st.subheader(atual["nome"])
         st.caption(atual["email"])
         if media["qtd"]:
-            st.write(f"⭐ **{media['media']:.1f}** ({int(media['qtd'])} avaliações)")
+            st.write(f":material/star: **{media['media']:.1f}** ({int(media['qtd'])} avaliações)")
         else:
             st.write("Sem avaliações ainda.")
 
@@ -40,7 +40,7 @@ def pagina_perfil():
             except ErroAplicacao as e:
                 st.error(str(e))
 
-    st.subheader("💳 Meus cartões")
+    st.subheader(":material/credit_card: Meus cartões")
     cartoes = usuarios.listar_cartoes(user["cpf"])
     if cartoes.empty:
         st.caption("Nenhum cartão cadastrado.")
