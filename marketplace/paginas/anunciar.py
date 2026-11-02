@@ -69,7 +69,3 @@ def pagina_anunciar():
                 st.success(f"Anúncio #{novo} publicado!")
             except ErroAplicacao as e:
                 st.error(str(e))
-
-    st.subheader("Meus anúncios")
-    meus = anuncios.listar_do_vendedor(user["cpf"])
-    st.dataframe(meus, width="stretch", hide_index=True)

@@ -10,6 +10,7 @@ from marketplace.paginas.dashboard import pagina_dashboard
 from marketplace.paginas.diagnostico import diagnostico_tabelas
 from marketplace.paginas.loja import pagina_loja
 from marketplace.paginas.mensagens import pagina_mensagens
+from marketplace.paginas.meus_anuncios import pagina_minha_loja
 from marketplace.paginas.perfil import pagina_perfil
 from marketplace.paginas.transacoes import pagina_compras, pagina_vendas
 
@@ -42,6 +43,7 @@ PAGINAS = {
     ":material/storefront: Loja": pagina_loja,
     ":material/search: Busca avançada": pagina_busca,
     ":material/sell: Anunciar": pagina_anunciar,
+    ":material/store: Minha loja": pagina_minha_loja,
     ":material/mail: Mensagens": pagina_mensagens,
     ":material/package_2: Minhas compras": pagina_compras,
     ":material/work: Minhas vendas": pagina_vendas,
