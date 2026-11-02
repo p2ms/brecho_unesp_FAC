@@ -1,10 +1,13 @@
 """Fotos dos anúncios no Supabase Storage: o banco guarda só o link público."""
+import logging
 import uuid
 
 import requests
 
 from ..config import SUPABASE_BUCKET, SUPABASE_SERVICE_KEY, SUPABASE_URL
 from ..erros import ErroArmazenamento, ErroValidacao
+
+log = logging.getLogger(__name__)
 
 MAX_FOTOS = 5
 MAX_BYTES = 5 * 1024 * 1024
@@ -43,6 +46,13 @@ def _validar(arquivos):
     return tipos
 
 
+def _descrever_falha(erro):
+    """Resume a falha para o terminal: o código HTTP distingue chave errada de problema de rede."""
+    if erro.response is not None:
+        return f"HTTP {erro.response.status_code}: {erro.response.text[:200]}"
+    return f"{type(erro).__name__}: {erro}"
+
+
 def enviar_fotos(arquivos):
     """Envia os arquivos (bytes) e devolve os links públicos; se um falhar, apaga os já enviados."""
     tipos = _validar(arquivos)
@@ -64,6 +74,7 @@ def enviar_fotos(arquivos):
             resposta.raise_for_status()
             urls.append(f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{caminho}")
     except requests.RequestException as e:
+        log.error("Falha ao enviar foto ao Supabase Storage: %s", _descrever_falha(e))
         remover_fotos(urls)
         raise ErroArmazenamento("Não foi possível enviar as fotos. Tente novamente.") from e
     return urls
