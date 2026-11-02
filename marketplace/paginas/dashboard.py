@@ -14,7 +14,7 @@ def _mostrar(col, df, fig_fn):
 
 
 def pagina_dashboard():
-    st.header("📊 Dashboard analítico")
+    st.header(":material/bar_chart: Dashboard analítico")
     tab_geral, tab_mercado, tab_usuarios, tab_op = st.tabs(
         ["Visão geral", "Mercado", "Usuários", "Operação"]
     )

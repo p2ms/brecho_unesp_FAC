@@ -13,14 +13,14 @@ def pagina_loja():
     if sel:
         return detalhe_anuncio(sel)
 
-    st.header("🛍️ Anúncios disponíveis")
+    st.header(":material/storefront: Anúncios disponíveis")
     df = anuncios.buscar_anuncios()
     if df.empty:
         st.info("Nenhum anúncio disponível ainda.")
         return
 
     c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
-    busca = c1.text_input("🔎 Buscar", placeholder="título, item, marca ou tag...")
+    busca = c1.text_input(":material/search: Buscar", placeholder="título, item, marca ou tag...")
     categoria = c2.selectbox("Categoria", ["Todas"] + sorted(df["nome_categoria"].unique()))
     tipo = c3.selectbox("Tipo", ["Todos"] + TIPOS)
     estado = c4.selectbox("Estado", ["Todos"] + ESTADOS)
@@ -51,14 +51,14 @@ def pagina_loja():
             st.markdown(f"**{card_preco(a)}**")
             st.caption(f"Vendedor: {a['vendedor']}")
             if a["tags"]:
-                st.caption("🏷️ " + a["tags"])
+                st.caption(":material/label: " + a["tags"])
             if st.button("Ver detalhes", key=f"ver_{a['id_anuncio']}", width="stretch"):
                 st.session_state["anuncio_sel"] = int(a["id_anuncio"])
                 st.rerun()
 
 
 def detalhe_anuncio(id_anuncio):
-    if st.button("← Voltar"):
+    if st.button(":material/arrow_back: Voltar"):
         st.session_state["anuncio_sel"] = None
         st.rerun()
 
@@ -84,7 +84,7 @@ def detalhe_anuncio(id_anuncio):
         st.write(f"**Item:** {a['item']} ({a['marca'] or 'sem marca'}) · **Estado:** {a['estado']}")
         st.write(f"**Categoria:** {a['nome_categoria']}")
         if a["tags"]:
-            st.write("🏷️ " + a["tags"])
+            st.write(":material/label: " + a["tags"])
         st.write(f"**Vendedor:** {a['vendedor']}")
         if a["descricao_anuncio"]:
             st.write(a["descricao_anuncio"])
@@ -115,7 +115,7 @@ def detalhe_anuncio(id_anuncio):
                     except ErroAplicacao as e:
                         st.error(str(e))
 
-    tab_com, tab_msg = st.tabs(["💬 Comentários", "✉️ Mensagem ao vendedor"])
+    tab_com, tab_msg = st.tabs([":material/chat: Comentários", ":material/mail: Mensagem ao vendedor"])
     with tab_com:
         comentarios(id_anuncio)
     with tab_msg:

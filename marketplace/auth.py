@@ -20,10 +20,10 @@ def require_login():
 
 def sidebar_conta():
     with st.sidebar:
-        st.title("🔁 Marketplace")
+        st.title(":material/sync: Marketplace")
         user = current_user()
         if user:
-            st.write(f"Olá, **{user['nome']}** 👋")
+            st.write(f"Olá, **{user['nome']}** :material/waving_hand:")
             if st.button("Sair", width="stretch"):
                 del st.session_state["user"]
                 st.rerun()

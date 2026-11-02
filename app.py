@@ -13,7 +13,7 @@ from marketplace.paginas.mensagens import pagina_mensagens
 from marketplace.paginas.perfil import pagina_perfil
 from marketplace.paginas.transacoes import pagina_compras, pagina_vendas
 
-st.set_page_config(page_title="Marketplace", page_icon="🔁", layout="wide")
+st.set_page_config(page_title="Marketplace", page_icon=":material/sync:", layout="wide")
 
 if not DATABASE_URL:
     st.error("Dados de conexão com o banco não encontrados (DATABASE_URL ou DB_HOST/DB_USER/...).")
@@ -39,14 +39,14 @@ Publicado no Streamlit Cloud? Defina `DATABASE_URL` em *Settings → Secrets*.
 sidebar_conta()
 
 PAGINAS = {
-    "🛍️ Loja": pagina_loja,
-    "🔍 Busca avançada": pagina_busca,
-    "💰 Anunciar": pagina_anunciar,
-    "✉️ Mensagens": pagina_mensagens,
-    "📦 Minhas compras": pagina_compras,
-    "💼 Minhas vendas": pagina_vendas,
-    "👤 Perfil": pagina_perfil,
-    "📊 Dashboard": pagina_dashboard,
+    ":material/storefront: Loja": pagina_loja,
+    ":material/search: Busca avançada": pagina_busca,
+    ":material/sell: Anunciar": pagina_anunciar,
+    ":material/mail: Mensagens": pagina_mensagens,
+    ":material/package_2: Minhas compras": pagina_compras,
+    ":material/work: Minhas vendas": pagina_vendas,
+    ":material/person: Perfil": pagina_perfil,
+    ":material/bar_chart: Dashboard": pagina_dashboard,
 }
 with st.sidebar:
     st.divider()

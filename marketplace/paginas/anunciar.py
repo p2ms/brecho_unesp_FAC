@@ -9,10 +9,10 @@ from ..services import anuncios
 
 def pagina_anunciar():
     user = require_login()
-    st.header("💰 Criar anúncio")
+    st.header(":material/sell: Criar anúncio")
 
     cats = anuncios.listar_categorias()
-    with st.expander("➕ Nova categoria"):
+    with st.expander(":material/add: Nova categoria"):
         with st.form("nova_categoria", clear_on_submit=True):
             nome_cat = st.text_input("Nome da categoria")
             pai = st.selectbox("Categoria pai (opcional)", [""] + list(cats["nome_categoria"]))

@@ -1,4 +1,4 @@
-# 🔁 Marketplace de compra, venda e empréstimo de itens
+# Marketplace de compra, venda e empréstimo de itens
 
 Aplicação web feita com **Streamlit** e **PostgreSQL (Neon)** para o Trabalho de Banco de Dados II (Parte 1),
 sobre o banco de dados modelado em Banco de Dados I.

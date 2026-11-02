@@ -34,30 +34,30 @@ def _mostrar_transacoes(papel):
                 if papel == "comprador":
                     b1, b2 = st.columns(2)
                     if t["pagamento"] == "Pendente" and b1.button(
-                        "💳 Pagar", key=f"pagar_{id_t}", width="stretch"
+                        ":material/credit_card: Pagar", key=f"pagar_{id_t}", width="stretch"
                     ):
                         transacoes.pagar(id_t, user["cpf"])
                         st.rerun()
                     if t["entrega"] == "Enviado" and b2.button(
-                        "📦 Confirmar recebimento", key=f"rec_{id_t}", width="stretch"
+                        ":material/package_2: Confirmar recebimento", key=f"rec_{id_t}", width="stretch"
                     ):
                         transacoes.confirmar_recebimento(id_t, user["cpf"])
                         st.rerun()
 
                     if t["status_transacao"] == "Concluída":
-                        with st.expander("⭐ Avaliar vendedor"):
+                        with st.expander(":material/star: Avaliar vendedor"):
                             nota = st.slider("Nota", 0, 5, 5, key=f"nota_{id_t}")
                             if st.button("Enviar avaliação", key=f"aval_{id_t}"):
                                 transacoes.avaliar_vendedor(id_t, user["cpf"], nota)
                                 st.success("Avaliação enviada!")
-                    with st.expander("🛟 Abrir chamado de suporte"):
+                    with st.expander(":material/support_agent: Abrir chamado de suporte"):
                         desc = st.text_area("Descreva o problema", key=f"sup_txt_{id_t}")
                         if st.button("Abrir chamado", key=f"sup_{id_t}") and desc.strip():
                             transacoes.abrir_chamado(id_t, user["cpf"], desc)
                             st.success("Chamado aberto!")
                 else:
                     if t["entrega"] == "Pendente" and st.button(
-                        "🚚 Marcar como enviado", key=f"env_{id_t}"
+                        ":material/local_shipping: Marcar como enviado", key=f"env_{id_t}"
                     ):
                         transacoes.marcar_enviado(id_t, user["cpf"])
                         st.rerun()
@@ -67,7 +67,7 @@ def _mostrar_transacoes(papel):
 
 def pagina_compras():
     user = require_login()
-    st.header("📦 Minhas compras")
+    st.header(":material/package_2: Minhas compras")
     _mostrar_transacoes("comprador")
 
     st.subheader("Meus chamados de suporte")
@@ -77,5 +77,5 @@ def pagina_compras():
 
 def pagina_vendas():
     require_login()
-    st.header("💼 Minhas vendas")
+    st.header(":material/work: Minhas vendas")
     _mostrar_transacoes("vendedor")
