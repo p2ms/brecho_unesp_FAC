@@ -257,6 +257,9 @@ def busca_avancada(texto="", categoria="", tags=(), estados=(), tipo="Todos", no
         SELECT a.id_anuncio AS id, a.titulo, a.tipo, a.preco::float AS preco,
                i.nome AS item, i.marca, i.estado, i.nome_categoria AS categoria,
                u.nome AS vendedor,
+               e.prazo,
+               (SELECT url_foto FROM foto_anuncio f
+                 WHERE f.id_anuncio = a.id_anuncio ORDER BY f.id_foto LIMIT 1) AS foto,
                COALESCE(n.nota_media, 0) AS nota_vendedor,
                COALESCE(n.n, 0) AS avaliacoes,
                (SELECT COUNT(*) FROM comentario c WHERE c.id_anuncio = a.id_anuncio) AS comentarios,
@@ -266,6 +269,7 @@ def busca_avancada(texto="", categoria="", tags=(), estados=(), tipo="Todos", no
         FROM anuncio a
         JOIN item i ON i.id_item = a.id_item
         JOIN usuario u ON u.cpf = a.cpf_vendedor
+        LEFT JOIN emprestimo e ON e.id_anuncio = a.id_anuncio
         LEFT JOIN nota n ON n.cpf_avaliado = a.cpf_vendedor
         WHERE a.status = 'Disponível' AND a.preco BETWEEN %s AND %s
     """
@@ -274,8 +278,10 @@ def busca_avancada(texto="", categoria="", tags=(), estados=(), tipo="Todos", no
     if categoria:
         sql += " AND i.nome_categoria IN (SELECT nome_categoria FROM cat)"
     if texto.strip():
-        sql += " AND (a.titulo ILIKE %s OR i.nome ILIKE %s OR i.marca ILIKE %s)"
-        params += [f"%{texto.strip()}%"] * 3
+        sql += """ AND (a.titulo ILIKE %s OR i.nome ILIKE %s OR i.marca ILIKE %s
+                        OR EXISTS (SELECT 1 FROM item_tag t
+                                   WHERE t.id_item = i.id_item AND t.nome_tag ILIKE %s))"""
+        params += [f"%{texto.strip()}%"] * 4
     if tags:
         sql += """ AND (SELECT COUNT(DISTINCT t.nome_tag) FROM item_tag t
                         WHERE t.id_item = i.id_item AND t.nome_tag = ANY(%s)) = %s"""

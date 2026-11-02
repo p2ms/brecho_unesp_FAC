@@ -5,7 +5,8 @@ import plotly.express as px
 import streamlit as st
 
 ROSA = "#FE0B5D"
-CORES_GRAFICOS = [ROSA, "#1F5FA8", "#B3013B", "#C77700"]
+VINHO = "#B3013B"
+CORES_GRAFICOS = [ROSA, "#1F5FA8", VINHO, "#C77700"]
 
 _SOL = (
     "M96.8 39.2Q90.9 42.2 68.9 53.2Q86.1 70.6 90.7 75.4Q84.4 73.4 61.1 65.6Q60.9 90.1 60.8 96.8"
@@ -18,8 +19,8 @@ _CSS = """
 <style>
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 [class*="st-key-menu_"] [data-testid="stElementContainer"] {
     margin: 0;
@@ -90,6 +91,104 @@ _CSS = """
     line-height: 1.2;
     padding-top: 0;
 }
+[data-testid="stMainBlockContainer"] {
+    --margem: 2rem;
+    max-width: none;
+    padding: 3.5rem var(--margem) 4rem;
+}
+@media (max-width: 640px) {
+    [data-testid="stMainBlockContainer"] {
+        --margem: 1rem;
+    }
+}
+[data-testid="stMain"] h2 {
+    font-weight: 300;
+}
+.capa {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 440px;
+    box-sizing: border-box;
+    margin: 0 calc(var(--margem) * -1);
+    padding: 2rem var(--margem);
+    background: #FE0B5D;
+    color: #000000;
+}
+.capa img {
+    position: absolute;
+    top: -120px;
+    right: -80px;
+}
+.capa h1 {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    color: #000000;
+    font-family: "Spectral", serif;
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    font-weight: 300;
+    line-height: 1.02;
+    letter-spacing: 0.04em;
+}
+.capa p {
+    position: relative;
+    margin: 1rem 0 0;
+    font-size: 1.125rem;
+}
+.faixa {
+    display: flex;
+    gap: 3rem;
+    overflow: hidden;
+    margin: 0 calc(var(--margem) * -1);
+    padding: 0.8rem var(--margem);
+    border-bottom: 1px solid #FE0B5D;
+    font-size: 15px;
+    letter-spacing: 0.38em;
+    white-space: nowrap;
+}
+.faixa span {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 1.5rem;
+}
+.card-tipo {
+    margin: -1rem -1rem 0;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #FE0B5D;
+    background: #FCEBF2;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+.sem-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 220px;
+}
+.sem-foto.grande {
+    flex-direction: column;
+    gap: 1rem;
+    height: auto;
+    min-height: 440px;
+    background: #FE0B5D;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+}
+[class*="st-key-card_anuncio_"] [data-testid="stImage"] img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+[class*="st-key-card_anuncio_"] a {
+    justify-content: center;
+    border: 1px solid #FE0B5D;
+    border-radius: 0;
+}
 </style>
 """
 
@@ -102,9 +201,9 @@ def sol_svg(tamanho=144, cor=ROSA):
     )
 
 
-def sol_html(tamanho=144):
+def sol_html(tamanho=144, cor=ROSA):
     """Sol como imagem: st.html remove tags <svg> ao sanitizar o conteúdo."""
-    dados = base64.b64encode(sol_svg(tamanho).encode()).decode()
+    dados = base64.b64encode(sol_svg(tamanho, cor).encode()).decode()
     return f'<img alt="" width="{tamanho}" height="{tamanho}" src="data:image/svg+xml;base64,{dados}">'
 
 

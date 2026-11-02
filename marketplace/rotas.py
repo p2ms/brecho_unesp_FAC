@@ -2,7 +2,6 @@
 import streamlit as st
 
 from .paginas.anunciar import pagina_anunciar
-from .paginas.busca import pagina_busca
 from .paginas.conta import pagina_conta
 from .paginas.dashboard import pagina_dashboard
 from .paginas.loja import pagina_anuncio, pagina_loja
@@ -14,7 +13,6 @@ def criar_paginas():
     return {
         "loja": st.Page(pagina_loja, title="Loja", default=True),
         "anuncio": st.Page(pagina_anuncio, title="Anúncio", url_path="anuncio"),
-        "busca": st.Page(pagina_busca, title="Busca avançada", url_path="busca"),
         "anunciar": st.Page(pagina_anunciar, title="Anunciar", url_path="anunciar"),
         "minha_loja": st.Page(pagina_minha_loja, title="Minha loja", url_path="minha-loja"),
         "mensagens": st.Page(pagina_mensagens, title="Mensagens", url_path="mensagens"),
