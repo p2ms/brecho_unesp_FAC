@@ -37,7 +37,7 @@ def pagina_dashboard():
         _mostrar(
             c2,
             analises.anuncios_por_status(),
-            lambda d: px.pie(d, names="status", values="qtd", title="Anúncios por status"),
+            lambda d: px.pie(d, names="status", values="qtd", color="status", title="Anúncios por status"),
         )
 
         _mostrar(
@@ -127,7 +127,7 @@ def pagina_dashboard():
             _mostrar(
                 c2,
                 analises.metodos_pagamento(),
-                lambda d: px.pie(d, names="metodo", values="qtd", title="Métodos de pagamento"),
+                lambda d: px.pie(d, names="metodo", values="qtd", color="metodo", title="Métodos de pagamento"),
             )
 
             tempos = analises.tempos_transacao()

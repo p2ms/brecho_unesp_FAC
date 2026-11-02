@@ -16,7 +16,7 @@ def _mostrar_transacoes(papel):
 
     for _, t in df.iterrows():
         id_t = int(t["id_transacao"])
-        with st.container(border=True):
+        with st.container(border=True, key=f"card_transacao_{id_t}"):
             c1, c2 = st.columns([3, 2])
             c1.subheader(f"#{id_t} · {t['titulo']}")
             c1.caption(

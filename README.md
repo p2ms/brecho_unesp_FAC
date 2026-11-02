@@ -1,4 +1,6 @@
-# Marketplace de compra, venda e empréstimo de itens
+# Brechó da Unesp
+
+Marketplace de compra, venda e empréstimo de itens.
 
 Aplicação web feita com **Streamlit** e **PostgreSQL (Neon)** para o Trabalho de Banco de Dados II (Parte 1),
 sobre o banco de dados modelado em Banco de Dados I.
@@ -32,8 +34,10 @@ entrega e avaliam o vendedor. Um **dashboard analítico** mostra como o mercado 
 
 ```
 app.py                     # ponto de entrada: configuração da página, menu lateral e navegação
+.streamlit/config.toml     # tema: cores, fontes, cantos retos e cores dos gráficos
 marketplace/
 ├── config.py              # DATABASE_URL (.env / Secrets) e constantes do domínio
+├── estilo.py              # CSS que o tema não cobre e desenho do sol
 ├── erros.py               # erros da aplicação, com mensagem pronta para a tela
 ├── db.py                  # conexão, query_df, execute e run_tx (transações)
 ├── services/              # "backend": regras de negócio, permissões e todo o SQL

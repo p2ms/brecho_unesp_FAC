@@ -43,7 +43,7 @@ def pagina_loja():
     st.caption(f"{len(df)} anúncio(s)")
     cols = st.columns(3)
     for i, (_, a) in enumerate(df.iterrows()):
-        with cols[i % 3].container(border=True):
+        with cols[i % 3].container(border=True, key=f"card_anuncio_{a['id_anuncio']}"):
             if eh_link(a["foto"]):
                 st.image(a["foto"], width="stretch")
             st.subheader(a["titulo"])

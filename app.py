@@ -4,6 +4,7 @@ import streamlit as st
 from marketplace.auth import sidebar_conta
 from marketplace.config import DATABASE_URL, ENV_PATH
 from marketplace.erros import ErroAplicacao, TabelaAusente
+from marketplace.estilo import aplicar_estilo, sol_html, sol_svg
 from marketplace.paginas.anunciar import pagina_anunciar
 from marketplace.paginas.busca import pagina_busca
 from marketplace.paginas.dashboard import pagina_dashboard
@@ -14,7 +15,8 @@ from marketplace.paginas.meus_anuncios import pagina_minha_loja
 from marketplace.paginas.perfil import pagina_perfil
 from marketplace.paginas.transacoes import pagina_compras, pagina_vendas
 
-st.set_page_config(page_title="Marketplace", page_icon=":material/sync:", layout="wide")
+st.set_page_config(page_title="Brechó da Unesp", page_icon=sol_svg(64), layout="wide")
+aplicar_estilo()
 
 if not DATABASE_URL:
     st.error("Dados de conexão com o banco não encontrados (DATABASE_URL ou DB_HOST/DB_USER/...).")
@@ -53,6 +55,7 @@ PAGINAS = {
 with st.sidebar:
     st.divider()
     escolha = st.radio("Navegação", list(PAGINAS), label_visibility="collapsed")
+    st.html(sol_html())
 
 try:
     PAGINAS[escolha]()

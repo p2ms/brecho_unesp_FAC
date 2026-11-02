@@ -99,7 +99,7 @@ def pagina_minha_loja():
 
     for _, a in meus.iterrows():
         id_anuncio = int(a["id"])
-        with st.container(border=True):
+        with st.container(border=True, key=f"card_meu_anuncio_{id_anuncio}"):
             c1, c2, c3 = st.columns([6, 1, 1], vertical_alignment="center")
             c1.markdown(f"**{a['titulo']}**")
             c1.caption(f"{a['tipo']} · R$ {float(a['preco']):.2f} · {a['status']}")
