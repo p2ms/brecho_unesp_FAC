@@ -17,6 +17,9 @@ _SOL = (
 
 _CSS = """
 <style>
+[data-testid="stSidebarContent"] {
+    scrollbar-gutter: auto !important;
+}
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {
     width: 100% !important;
@@ -33,10 +36,10 @@ _CSS = """
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: 48px;
+    height: 48px;
     box-sizing: border-box;
     margin: 0;
-    padding: 10px 32px;
+    padding: 0 32px;
     border-radius: 0;
     border-bottom: 1px solid #FE0B5D;
 }
@@ -53,13 +56,23 @@ _CSS = """
     letter-spacing: 0;
     text-transform: none;
 }
-.st-key-menu_marca a,
 .st-key-menu_ativo a,
 [class*="st-key-menu_"] a:hover {
     background: #FE0B5D;
 }
 .st-key-menu_marca a {
-    border-bottom-color: #000000;
+    background: #FFD3E2;
+}
+/* O botão de recolher fica sobre a primeira linha, para o menu começar no topo */
+[data-testid="stSidebarHeader"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    width: auto;
+    height: 48px;
+    padding: 0 0.5rem;
+    align-items: center;
 }
 .st-key-menu_busca {
     padding: 10px 32px;
@@ -72,22 +85,36 @@ _CSS = """
 .st-key-menu_sol {
     padding: 32px;
 }
+/* A barra do breadcrumb é a primeira coisa da página: o cabeçalho só deixa os botões por cima dela */
 [data-testid="stHeader"] {
-    height: 2.75rem !important;
-    min-height: 2.75rem !important;
-    background: #FFFFFF;
+    height: 48px !important;
+    min-height: 48px !important;
+    background: transparent;
+    pointer-events: none;
+}
+[data-testid="stHeader"] button {
+    pointer-events: auto;
 }
 [data-testid="stLayoutWrapper"]:has(> .st-key-trilha) {
     position: sticky;
-    top: 2.75rem;
+    top: 0;
     z-index: 100;
+    display: flex;
+    align-items: center;
     box-sizing: border-box;
     width: calc(100% + var(--margem) * 2);
     max-width: none;
-    margin: 0 calc(var(--margem) * -1);
-    padding: 0 var(--margem) 12px;
+    height: 48px;
+    margin: -1rem calc(var(--margem) * -1) 0; /* compensa o espaço dos blocos invisíveis de CSS e script */
+    padding: 0 var(--margem);
     border-bottom: 1px solid #FE0B5D;
     background: #FFFFFF;
+}
+[data-testid="stApp"]:has([data-testid="stExpandSidebarButton"]) [data-testid="stLayoutWrapper"]:has(> .st-key-trilha) {
+    padding-left: 3.5rem;
+}
+.st-key-trilha [data-testid="stElementContainer"] {
+    margin: 0;
 }
 .st-key-trilha a {
     padding: 0;
@@ -115,7 +142,7 @@ _CSS = """
 [data-testid="stMainBlockContainer"] {
     --margem: 2rem;
     max-width: none;
-    padding: 2.75rem var(--margem) 4rem;
+    padding: 0 var(--margem) 4rem;
 }
 @media (max-width: 640px) {
     [data-testid="stMainBlockContainer"] {

@@ -44,14 +44,12 @@ def _sincronizar_endereco(pagina_atual):
     st.query_params.from_dict({k: v for k, v in st.query_params.to_dict().items() if k in aceitos})
 
 
-def menu(pagina_atual):
-    _sincronizar_endereco(pagina_atual)
-    atual = "loja" if pagina_atual == "anuncio" else pagina_atual
+def menu(atual):
+    _sincronizar_endereco(atual)
     user = current_user()
     with st.sidebar:
         with st.container(key="menu_marca"):
             st.page_link(pagina("loja"), label="Brechó da Unesp", width="stretch")
-        _linha("Loja", "storefront", "loja", atual)
         _linha("Anunciar", "sell", "anunciar", atual)
         _linha("Minha loja", "store", "minha_loja", atual)
         _linha("Mensagens", "mail", "mensagens", atual)
@@ -59,6 +57,6 @@ def menu(pagina_atual):
         pendentes = f" ({transacoes.contar_pendentes(user['cpf'])})" if user else ""
         _linha(f"Sacola{pendentes}", "shopping_bag", "conta", atual, {"aba": "compras"}, chave="sacola")
         _linha("Minha conta", "person", "conta", atual)
-        _busca(pagina_atual)
+        _busca(atual)
         with st.container(key="menu_sol"):
             st.html(sol_html())
