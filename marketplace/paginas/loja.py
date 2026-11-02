@@ -43,7 +43,7 @@ def pagina_loja():
     st.caption(f"{len(df)} anúncio(s)")
     cols = st.columns(3)
     for i, (_, a) in enumerate(df.iterrows()):
-        with cols[i % 3].container(border=True):
+        with cols[i % 3].container(border=True, key=f"card_anuncio_{a['id_anuncio']}"):
             if eh_link(a["foto"]):
                 st.image(a["foto"], width="stretch")
             st.subheader(a["titulo"])
@@ -97,7 +97,7 @@ def detalhe_anuncio(id_anuncio):
         elif user is None:
             st.info("Entre na sua conta para comprar.")
         elif user["cpf"] == a["cpf_vendedor"]:
-            st.info("Este é o seu anúncio.")
+            st.info("Este é o seu anúncio. Para editar ou apagar, vá em 'Minha loja'.")
         else:
             rotulo = "Solicitar empréstimo" if a["tipo"] == "Empréstimo" else "Comprar"
             with st.form(f"form_compra_{id_anuncio}"):

@@ -20,7 +20,7 @@ def require_login():
 
 def sidebar_conta():
     with st.sidebar:
-        st.title(":material/sync: Marketplace")
+        st.title("Brechó da Unesp")
         user = current_user()
         if user:
             st.write(f"Olá, **{user['nome']}** :material/waving_hand:")

@@ -1,7 +1,7 @@
 """Anúncios, itens, categorias, tags e busca."""
 from . import armazenamento
 from ..db import execute, query_df, run_tx
-from ..erros import ErroValidacao
+from ..erros import ErroValidacao, NaoAutorizado
 
 ORDENS_BUSCA = {
     "Mais recentes": "a.data_hora_publicacao DESC",
@@ -54,7 +54,10 @@ def listar_fotos(id_anuncio):
 def listar_do_vendedor(cpf):
     return query_df(
         """SELECT a.id_anuncio AS id, a.titulo, a.tipo, a.preco, a.status,
-                  i.nome AS item, a.data_hora_publicacao AS publicado_em
+                  i.nome AS item, a.data_hora_publicacao AS publicado_em,
+                  a.status <> 'Disponível' OR EXISTS (
+                      SELECT 1 FROM transacao t WHERE t.id_anuncio = a.id_anuncio
+                  ) AS bloqueado
            FROM anuncio a JOIN item i ON i.id_item = a.id_item
            WHERE a.cpf_vendedor = %s ORDER BY a.data_hora_publicacao DESC""",
         (cpf,),
@@ -126,6 +129,105 @@ def criar_anuncio(cpf, d):
     except Exception:  # a transação foi desfeita: as fotos enviadas ficariam sem anúncio
         armazenamento.remover_fotos(urls)
         raise
+
+
+def _anuncio_alteravel(cur, cpf, id_anuncio):
+    """Trava o anúncio e confere se ele é de quem pediu e se ainda não entrou em nenhuma transação."""
+    cur.execute(
+        """SELECT a.cpf_vendedor, a.status, a.id_item, a.tipo,
+                  EXISTS (SELECT 1 FROM transacao t WHERE t.id_anuncio = a.id_anuncio)
+           FROM anuncio a WHERE a.id_anuncio = %s FOR UPDATE""",
+        (id_anuncio,),
+    )
+    linha = cur.fetchone()
+    if linha is None:
+        raise ErroValidacao("Anúncio não encontrado.")
+    vendedor, status, id_item, tipo, tem_transacao = linha
+    if vendedor.strip() != cpf:
+        raise NaoAutorizado("Só quem publicou o anúncio pode alterá-lo.")
+    if status != "Disponível" or tem_transacao:
+        raise ErroValidacao("Anúncios que já entraram em uma transação não podem ser alterados.")
+    return id_item, tipo
+
+
+def _contar_fotos(cur, id_anuncio, removidas):
+    cur.execute(
+        "SELECT COUNT(*) FROM foto_anuncio WHERE id_anuncio = %s AND NOT url_foto = ANY(%s)",
+        (id_anuncio, list(removidas)),
+    )
+    return cur.fetchone()[0]
+
+
+def editar_anuncio(cpf, id_anuncio, d):
+    if not d["titulo"].strip() or not d["item"].strip():
+        raise ErroValidacao("Título e nome do item são obrigatórios.")
+    tags = sorted({t.strip().lower() for t in d["tags"] if t.strip()})
+    removidas = d["fotos_removidas"]
+
+    def conferir(cur):
+        _anuncio_alteravel(cur, cpf, id_anuncio)
+        if _contar_fotos(cur, id_anuncio, removidas) + len(d["fotos_novas"]) > armazenamento.MAX_FOTOS:
+            raise ErroValidacao(f"Um anúncio pode ter no máximo {armazenamento.MAX_FOTOS} fotos.")
+
+    run_tx(conferir)  # antes do envio, para não subir fotos de uma edição que seria recusada
+    urls = armazenamento.enviar_fotos(d["fotos_novas"])
+
+    def tx(cur):
+        id_item, tipo = _anuncio_alteravel(cur, cpf, id_anuncio)
+        cur.execute(
+            "UPDATE anuncio SET titulo = %s, descricao = %s, preco = %s WHERE id_anuncio = %s",
+            (d["titulo"].strip(), d["descricao"].strip() or None, d["preco"], id_anuncio),
+        )
+        cur.execute(
+            """UPDATE item SET nome = %s, marca = %s, descricao = %s, estado = %s, nome_categoria = %s
+               WHERE id_item = %s""",
+            (d["item"].strip(), d["marca"].strip() or None, d["descricao_item"].strip() or None,
+             d["estado"], d["categoria"], id_item),
+        )
+        if tipo == "Empréstimo":
+            cur.execute("UPDATE emprestimo SET prazo = %s WHERE id_anuncio = %s", (d["prazo"], id_anuncio))
+
+        cur.execute("DELETE FROM item_tag WHERE id_item = %s", (id_item,))
+        for tag in tags:
+            cur.execute("INSERT INTO tag (nome_tag) VALUES (%s) ON CONFLICT DO NOTHING", (tag,))
+            cur.execute("INSERT INTO item_tag (id_item, nome_tag) VALUES (%s, %s)", (id_item, tag))
+
+        cur.execute(
+            "DELETE FROM foto_anuncio WHERE id_anuncio = %s AND url_foto = ANY(%s) RETURNING url_foto",
+            (id_anuncio, list(removidas)),
+        )
+        apagadas = [linha[0] for linha in cur.fetchall()]
+        for url in urls:
+            cur.execute(
+                "INSERT INTO foto_anuncio (id_anuncio, url_foto) VALUES (%s, %s)",
+                (id_anuncio, url),
+            )
+        return apagadas
+
+    try:
+        apagadas = run_tx(tx)
+    except Exception:
+        armazenamento.remover_fotos(urls)
+        raise
+    armazenamento.remover_fotos(apagadas)
+
+
+def apagar_anuncio(cpf, id_anuncio):
+    """Apaga o anúncio, o que depende dele no banco (fotos, comentários, mensagens) e o item sem outro anúncio."""
+
+    def tx(cur):
+        id_item, _ = _anuncio_alteravel(cur, cpf, id_anuncio)
+        cur.execute("SELECT url_foto FROM foto_anuncio WHERE id_anuncio = %s", (id_anuncio,))
+        fotos = [linha[0] for linha in cur.fetchall()]
+        cur.execute("DELETE FROM anuncio WHERE id_anuncio = %s", (id_anuncio,))
+        cur.execute(
+            """DELETE FROM item i WHERE i.id_item = %s
+               AND NOT EXISTS (SELECT 1 FROM anuncio a WHERE a.id_item = i.id_item)""",
+            (id_item,),
+        )
+        return fotos
+
+    armazenamento.remover_fotos(run_tx(tx))
 
 
 def busca_avancada(texto="", categoria="", tags=(), estados=(), tipo="Todos", nota_min=0.0,

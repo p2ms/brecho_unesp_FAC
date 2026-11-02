@@ -49,8 +49,8 @@ def comentarios(id_anuncio):
 
     if df.empty:
         st.caption("Sem comentários ainda.")
-    for _, c in df.iterrows():
-        with st.container(border=True):
+    for i, c in df.iterrows():
+        with st.container(border=True, key=f"card_comentario_{i}"):
             st.caption(f"{c['nome']} · {c['data_hora']:%d/%m/%Y %H:%M}")
             st.write(c["texto"])
 

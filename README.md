@@ -1,4 +1,6 @@
-# Marketplace de compra, venda e empréstimo de itens
+# Brechó da Unesp
+
+Marketplace de compra, venda e empréstimo de itens.
 
 Aplicação web feita com **Streamlit** e **PostgreSQL (Neon)** para o Trabalho de Banco de Dados II (Parte 1),
 sobre o banco de dados modelado em Banco de Dados I.
@@ -23,7 +25,8 @@ entrega e avaliam o vendedor. Um **dashboard analítico** mostra como o mercado 
 | Busca avançada | Filtros combinados: texto, categoria **com subcategorias (CTE recursiva)**, tags (todas), estado, tipo, preço, nota do vendedor, data | anuncio, item, categoria, item_tag, usuario, avaliacao, comentario |
 | Anunciar | Cria item, tags, anúncio, empréstimo e fotos **em uma única transação** | item, tag, item_tag, anuncio, emprestimo, foto_anuncio, categoria |
 | Mensagens | Caixa de entrada por anúncio | mensagem, anuncio, usuario |
-| Minhas compras / vendas | Pagamento, envio, recebimento, avaliação e suporte | transacao, pagamento, entrega, avaliacao, suporte |
+| Minha loja | Edita e apaga os próprios anúncios que ainda não têm transação | anuncio, item, item_tag, emprestimo, foto_anuncio, transacao |
+| Minhas compras / vendas | Pagamento, envio, recebimento, avaliação e suporte; em vendas, também lista os anúncios que não podem mais ser editados | transacao, pagamento, entrega, avaliacao, suporte, anuncio |
 | Perfil | Dados, nota média e cartões | usuario, avaliacao, cartao |
 | Dashboard | Análises (ver abaixo) | todas |
 
@@ -31,8 +34,10 @@ entrega e avaliam o vendedor. Um **dashboard analítico** mostra como o mercado 
 
 ```
 app.py                     # ponto de entrada: configuração da página, menu lateral e navegação
+.streamlit/config.toml     # tema: cores, fontes, cantos retos e cores dos gráficos
 marketplace/
 ├── config.py              # DATABASE_URL (.env / Secrets) e constantes do domínio
+├── estilo.py              # CSS que o tema não cobre e desenho do sol
 ├── erros.py               # erros da aplicação, com mensagem pronta para a tela
 ├── db.py                  # conexão, query_df, execute e run_tx (transações)
 ├── services/              # "backend": regras de negócio, permissões e todo o SQL
@@ -48,6 +53,7 @@ marketplace/
     ├── loja.py            # vitrine + detalhe do anúncio
     ├── busca.py           # busca avançada
     ├── anunciar.py
+    ├── meus_anuncios.py   # minha loja: edita e apaga anúncios sem transação
     ├── mensagens.py
     ├── transacoes.py      # minhas compras / minhas vendas
     ├── perfil.py

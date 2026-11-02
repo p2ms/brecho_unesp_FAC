@@ -3,7 +3,7 @@ import streamlit as st
 
 from ..auth import require_login
 from ..erros import ErroAplicacao
-from ..services import transacoes
+from ..services import anuncios, transacoes
 
 
 def _mostrar_transacoes(papel):
@@ -16,7 +16,7 @@ def _mostrar_transacoes(papel):
 
     for _, t in df.iterrows():
         id_t = int(t["id_transacao"])
-        with st.container(border=True):
+        with st.container(border=True, key=f"card_transacao_{id_t}"):
             c1, c2 = st.columns([3, 2])
             c1.subheader(f"#{id_t} · {t['titulo']}")
             c1.caption(
@@ -76,6 +76,12 @@ def pagina_compras():
 
 
 def pagina_vendas():
-    require_login()
+    user = require_login()
     st.header(":material/work: Minhas vendas")
     _mostrar_transacoes("vendedor")
+
+    meus = anuncios.listar_do_vendedor(user["cpf"])
+    if not meus.empty and meus["bloqueado"].any():
+        st.subheader("Anúncios que não podem mais ser editados")
+        colunas = ["id", "titulo", "tipo", "preco", "status", "publicado_em"]
+        st.dataframe(meus.loc[meus["bloqueado"], colunas], width="stretch", hide_index=True)
