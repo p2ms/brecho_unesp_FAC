@@ -7,6 +7,11 @@ from .erros import ErroAplicacao
 from .services import interacoes
 
 
+def eh_link(foto):
+    """O banco tem fotos antigas salvas só com o nome do arquivo, que st.image não consegue abrir."""
+    return isinstance(foto, str) and foto.lower().startswith(("http://", "https://"))
+
+
 def chat(id_anuncio, meu_cpf, outro_cpf, key):
     msgs = interacoes.listar_mensagens(id_anuncio, meu_cpf, outro_cpf)
     if msgs.empty:

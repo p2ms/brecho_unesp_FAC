@@ -1,4 +1,5 @@
 """Anúncios, itens, categorias, tags e busca."""
+from . import armazenamento
 from ..db import execute, query_df, run_tx
 from ..erros import ErroValidacao
 
@@ -83,6 +84,7 @@ def criar_anuncio(cpf, d):
     if not d["titulo"].strip() or not d["item"].strip():
         raise ErroValidacao("Título e nome do item são obrigatórios.")
     tags = sorted({t.strip().lower() for t in d["tags"] if t.strip()})
+    urls = armazenamento.enviar_fotos(d["fotos"])
 
     def tx(cur):
         cur.execute(
@@ -112,14 +114,18 @@ def criar_anuncio(cpf, d):
                 "INSERT INTO emprestimo (id_anuncio, prazo) VALUES (%s, %s)",
                 (id_anuncio, d["prazo"]),
             )
-        for url in d["fotos"]:
+        for url in urls:
             cur.execute(
                 "INSERT INTO foto_anuncio (id_anuncio, url_foto) VALUES (%s, %s)",
                 (id_anuncio, url),
             )
         return id_anuncio
 
-    return run_tx(tx)
+    try:
+        return run_tx(tx)
+    except Exception:  # a transação foi desfeita: as fotos enviadas ficariam sem anúncio
+        armazenamento.remover_fotos(urls)
+        raise
 
 
 def busca_avancada(texto="", categoria="", tags=(), estados=(), tipo="Todos", nota_min=0.0,

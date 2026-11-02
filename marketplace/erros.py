@@ -23,3 +23,7 @@ class TabelaAusente(ErroBanco):
 
 class ConexaoFalhou(ErroBanco):
     """Não foi possível conectar ao banco."""
+
+
+class ErroArmazenamento(ErroAplicacao):
+    """Falha ao enviar arquivos para o armazenamento."""

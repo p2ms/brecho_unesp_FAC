@@ -28,7 +28,23 @@ if not DATABASE_URL:  # alternativa: Secrets do Streamlit (.streamlit/secrets.to
 if DATABASE_URL:
     DATABASE_URL = DATABASE_URL.strip().strip('"').strip("'")
 
-ESTADOS = ["Novo", "Quase Novo", "Usado", "Razoável", "Com avarias"]
+
+def _configuracao(nome):
+    valor = os.getenv(nome)
+    if not valor:
+        try:
+            valor = st.secrets.get(nome)
+        except Exception:
+            valor = None
+    return valor.strip().strip('"').strip("'") if valor else None
+
+
+# Supabase Storage: a chave de serviço dá acesso total ao projeto e fica só no servidor
+SUPABASE_URL = (_configuracao("SUPABASE_URL") or "").rstrip("/") or None
+SUPABASE_SERVICE_KEY = _configuracao("SUPABASE_SERVICE_KEY")
+SUPABASE_BUCKET = "fotos-anuncios"
+
+ESTADOS = ["Novo","Quase Novo", "Usado", "Razoável", "Com avarias"]
 TIPOS = ["Venda", "Empréstimo"]
 METODOS_PAGAMENTO = ["Pix", "Boleto", "Crédito", "Débito"]
 METODOS_ENTREGA = ["Retirada em mãos", "Correios", "Transportadora"]
