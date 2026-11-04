@@ -192,6 +192,20 @@ _CSS = """
     margin: 1rem 0 0;
     font-size: 1.125rem;
 }
+.capa--banner {
+    display: block;
+    min-height: 0;
+    padding: 0;
+    line-height: 0;
+}
+.capa--banner video,
+.capa--banner img {
+    position: static;
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 1;
+    object-fit: cover;
+}
 .faixa {
     display: flex;
     gap: 3rem;

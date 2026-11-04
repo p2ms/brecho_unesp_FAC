@@ -44,6 +44,10 @@ SUPABASE_URL = (_configuracao("SUPABASE_URL") or "").rstrip("/") or None
 SUPABASE_SERVICE_KEY = _configuracao("SUPABASE_SERVICE_KEY")
 SUPABASE_BUCKET = "fotos-anuncios"
 
+# Banner da capa da loja: video (.mp4/.webm) ou imagem (.gif/.png/.jpg/.webp) dentro de static/.
+# Vazio ou arquivo inexistente: aparece a capa padrao (sol + titulo).
+BANNER_CAPA = "static/banner_capa.mp4"
+
 ESTADOS = ["Novo","Quase Novo", "Usado", "Razoável", "Com avarias"]
 TIPOS = ["Venda", "Empréstimo"]
 METODOS_PAGAMENTO = ["Pix", "Boleto", "Crédito", "Débito"]

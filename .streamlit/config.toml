@@ -3,6 +3,7 @@ toolbarMode = "minimal"
 
 [server]
 maxUploadSize = 5
+enableStaticServing = true  # serve a pasta static/ em app/static/ (banner da capa)
 
 [theme]
 base = "light"
