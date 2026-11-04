@@ -1,9 +1,11 @@
 """Página Loja: capa, vitrine com busca combinada e detalhe com compra, comentários e chat."""
+from pathlib import Path
+
 import streamlit as st
 
 from ..auth import current_user
 from ..components import card_preco, chat, comentarios, eh_link
-from ..config import ESTADOS, METODOS_ENTREGA, METODOS_PAGAMENTO, TIPOS
+from ..config import BANNER_CAPA, ESTADOS, METODOS_ENTREGA, METODOS_PAGAMENTO, TIPOS
 from ..erros import ErroAplicacao
 from ..estilo import VINHO, sol_html
 from ..navegacao import pagina, trilha
@@ -13,7 +15,20 @@ COLUNAS = 4
 POR_PAGINA = 12
 
 
+RAIZ = Path(__file__).resolve().parents[2]  # pasta do app.py, onde fica static/
+VIDEOS = (".mp4", ".webm")
+
+
 def _capa():
+    banner = RAIZ / BANNER_CAPA if BANNER_CAPA else None
+    if banner and banner.is_file():
+        url = "app/" + banner.relative_to(RAIZ).as_posix()  # endereco do servidor de arquivos estaticos
+        if banner.suffix.lower() in VIDEOS:
+            midia = f'<video src="{url}" autoplay muted loop playsinline></video>'
+        else:
+            midia = f'<img src="{url}" alt="Brech&oacute; da Unesp">'
+        st.html(f'<div class="capa capa--banner">{midia}</div>')
+        return
     st.html(
         f'<div class="capa">{sol_html(460, VINHO)}<h1>brechó da unesp</h1>'
         "<p>Compre, venda e empreste.</p></div>"
